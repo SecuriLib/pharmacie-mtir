@@ -402,6 +402,7 @@
   <div class="content">
     <div class="page-header">
       <h1>Ajouter / Modifier un produit</h1>
+      <!-- Ce bouton appelle désormais `window.openModal()`, exposée plus bas -->
       <button onclick="openModal()">Ajouter un produit</button>
     </div>
 
@@ -427,10 +428,8 @@
        ================================================ -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
-      <!-- Titre du modal (varie selon mode) -->
       <h2 id="modalTitle">Ajouter un produit</h2>
 
-      <!-- Champ ID : mode Ajout → activé, mode Édit → désactivé -->
       <label for="inputId">ID :</label>
       <input type="text" id="inputId" placeholder="Ex : produit-001" />
 
@@ -453,14 +452,14 @@
 
       <div style="margin-top: 16px;">
         <button class="btn-cancel" id="modalCancel">Annuler</button>
-        <button class="btn-save" id="modalSave">Enregistrer</button>
+        <button class="btn-save"   id="modalSave">Enregistrer</button>
       </div>
     </div>
   </div>
 
   <!-- ==============================================
        SCRIPT JAVASCRIPT (Firebase + CRUD)
-       ================================================ -->
+       ============================================= -->
   <script type="module">
     // 1) Import des modules Firebase nécessaires
     import { initializeApp } 
@@ -510,32 +509,30 @@
     }
 
     // 4) Références DOM
-    const productTbody    = document.getElementById("productTbody");
-    const modalOverlay    = document.getElementById("modalOverlay");
-    const modalTitle      = document.getElementById("modalTitle");
-    const inputId         = document.getElementById("inputId");
-    const inputName       = document.getElementById("inputName");
-    const inputCategory   = document.getElementById("inputCategory");
+    const productTbody     = document.getElementById("productTbody");
+    const modalOverlay     = document.getElementById("modalOverlay");
+    const modalTitle       = document.getElementById("modalTitle");
+    const inputId          = document.getElementById("inputId");
+    const inputName        = document.getElementById("inputName");
+    const inputCategory    = document.getElementById("inputCategory");
     const inputSeuilOrange = document.getElementById("inputSeuilOrange");
     const inputSeuilRouge  = document.getElementById("inputSeuilRouge");
-    const modalCancel     = document.getElementById("modalCancel");
-    const modalSave       = document.getElementById("modalSave");
+    const modalCancel      = document.getElementById("modalCancel");
+    const modalSave        = document.getElementById("modalSave");
 
     // 5) Variable globale pour savoir si on est en mode édition
-    //    - null => mode “ajout”  
+    //    - null => mode “ajout”
     //    - string (ID) => mode “modifier <ID>”
     let editingId = null;
 
     // 6) Charger tous les produits depuis Firestore et afficher le tableau
     async function loadAllProducts() {
-      // Vider le <tbody> existant
-      productTbody.innerHTML = "";
+      productTbody.innerHTML = ""; // Vider l’ancien contenu
       try {
         const produitsCol = collection(db, "produits");
         const snapshot    = await getDocs(produitsCol);
 
         if (snapshot.empty) {
-          // Aucun produit dans Firestore
           console.warn("Aucun produit trouvé dans Firestore");
         }
         snapshot.forEach(docSnap => {
@@ -549,7 +546,7 @@
           });
         });
       } catch (err) {
-        console.error("Erreur lors du chargement Firestore :", err);
+        console.error("Erreur lors du chargement Firestore : ", err);
       }
     }
 
@@ -571,11 +568,10 @@
 
       // 7.1) Écouteur sur l’icône ✏️ (modifier)
       tr.querySelector("td.actions .material-icons[title='Modifier']").addEventListener("click", async () => {
-        // Passer en mode édition
         editingId = product.id;
         modalTitle.textContent = "Modifier le produit";
         inputId.value = product.id;
-        inputId.disabled = true; // empêcher de modifier l’ID
+        inputId.disabled = true;   // On empêche de changer l’ID
         inputName.value = product.name;
         inputCategory.value = product.category;
         inputSeuilOrange.value = product.seuilOrange;
@@ -591,12 +587,11 @@
         try {
           await deleteDoc(doc(db, "produits", product.id));
           tr.remove();
-          // Si on était en cours d’édition sur cet ID, on réinitialise le modal
           if (editingId === product.id) {
             closeModal();
           }
         } catch (err) {
-          console.error("Erreur lors de la suppression :", err);
+          console.error("Erreur lors de la suppression : ", err);
           alert("Impossible de supprimer le produit.");
         }
       });
@@ -624,7 +619,6 @@
     }
 
     modalCancel.addEventListener("click", closeModal);
-
     modalOverlay.addEventListener("click", (e) => {
       if (e.target === modalOverlay) {
         closeModal();
@@ -647,17 +641,16 @@
       }
 
       try {
-        // Si mode Édition (editingId != null), on met à jour le doc existant
         if (editingId) {
-          // On peut directement faire setDoc sur le doc existant
+          // ---- Mode Édition ----
           await setDoc(doc(db, "produits", editingId), {
             name: name,
             category: category,
             seuilOrange: seuilOrange,
             seuilRouge: seuilRouge,
-            stock: 0 // Conserver ou recalculer si besoin ; resté à 0 par défaut
+            stock: 0
           }, { merge: true });
-          // Mettre à jour la ligne du tableau côté UI
+          // Mettre à jour la ligne du tableau dans le DOM
           const existingRow = productTbody.querySelector(`tr[data-id="${editingId}"]`);
           if (existingRow) {
             existingRow.children[1].textContent = name;
@@ -669,32 +662,35 @@
           return;
         }
 
-        // Sinon (mode Ajout), vérifier qu’aucun doc n’existe déjà à cet ID
-        const docRef     = doc(db, "produits", id);
-        const docSnap    = await getDoc(docRef);
+        // ---- Mode Ajout ----
+        // Vérifier qu’aucun doc n’existe déjà sous cet ID
+        const docRef  = doc(db, "produits", id);
+        const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           alert("Un produit avec cet ID existe déjà. Choisissez un autre ID.");
           return;
         }
-
-        // Créer le nouveau document sous l’ID saisi
-        await setDoc(doc(db, "produits", id), {
+        await setDoc(docRef, {
           name: name,
           category: category,
           seuilOrange: seuilOrange,
           seuilRouge: seuilRouge,
           stock: 0
         });
-        // Ajouter immédiatement la ligne au tableau
         addProductRow({ id, name, category, seuilOrange, seuilRouge });
         closeModal();
       } catch (err) {
-        console.error("Erreur lors de l’écrasement ou création du doc :", err);
+        console.error("Erreur lors de la création/modification du produit : ", err);
         alert("Impossible d’enregistrer le produit (vérifiez vos permissions).");
       }
     });
 
-    // 10) Charger les produits au chargement de la page
+    // 10) Exposer openModal / closeModal dans window pour que 
+    //     <button onclick="openModal()">…</button> fonctionne
+    window.openModal  = openModal;
+    window.closeModal = closeModal;
+
+    // 11) Charger les produits au chargement de la page
     window.addEventListener("DOMContentLoaded", loadAllProducts);
   </script>
 </body>
