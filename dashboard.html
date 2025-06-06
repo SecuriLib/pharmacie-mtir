@@ -241,7 +241,7 @@
     .stat-info {
       flex-grow: 1;
     }
-    /* On ajoute un ID sur le <h2> pour pouvoir le mettre à jour en JavaScript */
+    /* Ajout d’un ID sur le <h2> pour pouvoir le mettre à jour dynamiquement */
     .stat-info h2 {
       font-size: 22px;
       margin-bottom: 4px;
@@ -412,7 +412,7 @@
       <div class="welcome-msg">Bonjour, <strong>Admin</strong> !</div>
     </div>
 
-    <!-- Statistiques clés (avec ID sur le premier <h2>) -->
+    <!-- Statistiques clés (avec ID sur le <h2> de la carte) -->
     <div class="stat-grid">
       <!-- Carte “Total articles en stock” -->
       <div class="stat-card">
@@ -420,7 +420,7 @@
           <span class="material-icons">inventory</span>
         </div>
         <div class="stat-info">
-          <!-- On donne un ID pour pouvoir insérer le nombre dynamiquement -->
+          <!-- L'ID "totalArticles" sera mis à jour en JS -->
           <h2 id="totalArticles">0</h2>
           <p>Total articles en stock</p>
         </div>
@@ -464,9 +464,9 @@
     <div class="lower-grid">
       <!-- Graphique placeholder -->
       <div class="chart-card">
-        <div class="card-title">Évolution du stock - 7 derniers jours</div>
+        <div class="card-title">Évolution du stock – 7 derniers jours</div>
         <div class="chart-placeholder">
-          <!-- À remplacer par un vrai graphique (Chart.js, ApexCharts…) -->
+          <!-- À remplacer par Chart.js, ApexCharts… -->
         </div>
       </div>
       <!-- Activités récentes -->
@@ -515,9 +515,14 @@
   </div>
 
   <!-- ==============================================
-       SCRIPT JAVASCRIPT (masquage admin-only + mise à jour du total)
-       ================================================ -->
+       SCRIPT JAVASCRIPT
+       (masquage admin-only + mise à jour du total)
+       ==============================================
+       Ce script s’exécute au chargement de la page, il
+       lit la clé "products" dans localStorage, en compte
+       la longueur, puis met à jour #totalArticles. -->
   <script>
+    // Fonction utilitaire pour extraire les paramètres GET
     function getQueryParams() {
       const params = {};
       window.location.search
@@ -531,24 +536,30 @@
       return params;
     }
 
+    // Récupère role=user/admin depuis l’URL (ex : dashboard.html?role=admin)
     const params = getQueryParams();
-    const role = params.role || "user";
+    const role   = params.role || "user";
 
-    // Masquer les sections “admin‐only” si on n'est pas admin
+    // Si l’utilisateur n’est pas admin, on masque les sections .admin-only
     if (role !== "admin") {
       document.querySelectorAll(".nav-group.admin-only").forEach(el => {
         el.style.display = "none";
       });
-      document.querySelector(".dashboard-header .welcome-msg").textContent = "Bonjour, Utilisateur !";
+      // En plus, on change le message de bienvenue
+      document.querySelector(".dashboard-header .welcome-msg")
+        .textContent = "Bonjour, Utilisateur !";
     }
 
-    // ------ MISE À JOUR DU TOTAL D'ARTICLES EN STOCK ------
-    // Récupère l'array des produits depuis localStorage (clé "products")
-    // Si la clé n'existe pas, on prend [] par défaut
+    // ===== Logiciel pour mettre à jour la carte “Total articles en stock” =====
+    // 1) On lit l’array “products” dans localStorage (initalisé par produit.html)
+    //    Si la clé n’existe pas, on aura un tableau vide []
     const products = JSON.parse(localStorage.getItem("products") || "[]");
-    // Nombre total de produits
+
+    // 2) On calcule le nombre d’éléments dans cet array
+    //    (suppose que chaque élément correspond à un produit unique)
     const totalCount = Array.isArray(products) ? products.length : 0;
-    // Met à jour le contenu du <h2 id="totalArticles">
+
+    // 3) On met à jour le <h2 id="totalArticles"> avec ce nombre
     document.getElementById("totalArticles").textContent = totalCount;
   </script>
 </body>
