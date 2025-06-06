@@ -241,10 +241,12 @@
     .stat-info {
       flex-grow: 1;
     }
+    /* On ajoute un ID sur le <h2> pour pouvoir le mettre à jour en JavaScript */
     .stat-info h2 {
       font-size: 22px;
       margin-bottom: 4px;
       color: #2c3e50;
+      white-space: nowrap;  /* Empêche le retour à la ligne intempestif */
     }
     .stat-info p {
       font-size: 14px;
@@ -410,17 +412,21 @@
       <div class="welcome-msg">Bonjour, <strong>Admin</strong> !</div>
     </div>
 
-    <!-- Statistiques clés -->
+    <!-- Statistiques clés (avec ID sur le premier <h2>) -->
     <div class="stat-grid">
+      <!-- Carte “Total articles en stock” -->
       <div class="stat-card">
         <div class="stat-icon">
           <span class="material-icons">inventory</span>
         </div>
         <div class="stat-info">
-          <h2>342</h2>
+          <!-- On donne un ID pour pouvoir insérer le nombre dynamiquement -->
+          <h2 id="totalArticles">0</h2>
           <p>Total articles en stock</p>
         </div>
       </div>
+
+      <!-- Carte “Articles bas stock” (pour l’instant statique) -->
       <div class="stat-card">
         <div class="stat-icon">
           <span class="material-icons">warning_amber</span>
@@ -430,6 +436,8 @@
           <p>Articles bas stock</p>
         </div>
       </div>
+
+      <!-- Carte “Articles en rupture de stock” (statique) -->
       <div class="stat-card">
         <div class="stat-icon">
           <span class="material-icons">remove_shopping_cart</span>
@@ -439,6 +447,8 @@
           <p>Articles en rupture de stock</p>
         </div>
       </div>
+
+      <!-- Carte “Produits critiques” (statique) -->
       <div class="stat-card">
         <div class="stat-icon">
           <span class="material-icons">report_problem</span>
@@ -450,16 +460,15 @@
       </div>
     </div>
 
-    <!-- Graphique + Activités récentes -->
+    <!-- Section inférieure : graphique + activités récentes -->
     <div class="lower-grid">
       <!-- Graphique placeholder -->
       <div class="chart-card">
-        <div class="card-title">Évolution du stock – 7 derniers jours</div>
+        <div class="card-title">Évolution du stock - 7 derniers jours</div>
         <div class="chart-placeholder">
-          <!-- À remplacer par votre librairie -->
+          <!-- À remplacer par un vrai graphique (Chart.js, ApexCharts…) -->
         </div>
       </div>
-
       <!-- Activités récentes -->
       <div class="activity-card">
         <div class="card-title">Activités récentes</div>
@@ -506,8 +515,8 @@
   </div>
 
   <!-- ==============================================
-       SCRIPT JAVASCRIPT (masquage admin-only)
-       ============================================== -->
+       SCRIPT JAVASCRIPT (masquage admin-only + mise à jour du total)
+       ================================================ -->
   <script>
     function getQueryParams() {
       const params = {};
@@ -525,13 +534,22 @@
     const params = getQueryParams();
     const role = params.role || "user";
 
-    // Si pas admin, on cache les sections admin-only et ajuste le message
+    // Masquer les sections “admin‐only” si on n'est pas admin
     if (role !== "admin") {
       document.querySelectorAll(".nav-group.admin-only").forEach(el => {
         el.style.display = "none";
       });
       document.querySelector(".dashboard-header .welcome-msg").textContent = "Bonjour, Utilisateur !";
     }
+
+    // ------ MISE À JOUR DU TOTAL D'ARTICLES EN STOCK ------
+    // Récupère l'array des produits depuis localStorage (clé "products")
+    // Si la clé n'existe pas, on prend [] par défaut
+    const products = JSON.parse(localStorage.getItem("products") || "[]");
+    // Nombre total de produits
+    const totalCount = Array.isArray(products) ? products.length : 0;
+    // Met à jour le contenu du <h2 id="totalArticles">
+    document.getElementById("totalArticles").textContent = totalCount;
   </script>
 </body>
 </html>
