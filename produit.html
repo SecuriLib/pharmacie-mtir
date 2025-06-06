@@ -475,7 +475,7 @@
        1. Masquage “admin-only”
        2. CRUD (Création/Modification/Suppression) dans Firestore
        3. Tri par ordre de création (orderBy("__name__", "asc"))
-       4. Attribution de event listeners (au lieu d’onclick inline)
+       4. Utilisation de setDoc(...) pour forcer l’ID choisi
   -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
@@ -483,7 +483,7 @@
       getFirestore,
       collection,
       getDocs,
-      addDoc,
+      setDoc,
       updateDoc,
       deleteDoc,
       doc,
@@ -527,22 +527,22 @@
     }
 
     // 3) RÉFÉRENCES AU DOM
-    const btnAddProd    = document.getElementById("btnAddProd");
-    const productTbody  = document.getElementById("productTbody");
-    const modalOverlay  = document.getElementById("modalOverlay");
-    const modalTitle    = document.getElementById("modalTitle");
-    const inputId       = document.getElementById("inputId");
-    const inputName     = document.getElementById("inputName");
-    const inputCategory = document.getElementById("inputCategory");
+    const btnAddProd      = document.getElementById("btnAddProd");
+    const productTbody    = document.getElementById("productTbody");
+    const modalOverlay    = document.getElementById("modalOverlay");
+    const modalTitle      = document.getElementById("modalTitle");
+    const inputId         = document.getElementById("inputId");
+    const inputName       = document.getElementById("inputName");
+    const inputCategory   = document.getElementById("inputCategory");
     const inputSeuilOrange = document.getElementById("inputSeuilOrange");
     const inputSeuilRouge  = document.getElementById("inputSeuilRouge");
-    const modalCancel   = document.getElementById("modalCancel");
-    const modalSave     = document.getElementById("modalSave");
+    const modalCancel     = document.getElementById("modalCancel");
+    const modalSave       = document.getElementById("modalSave");
 
-    let products       = [];    // contiendra la liste des produits Firestore
-    let editingDocId   = null;  // si on édite, l’ID du doc, sinon null
+    let products       = [];    // Liste chargée depuis Firestore
+    let editingDocId   = null;  // Si on est en mode “modification”, l’ID du doc
 
-    // 4) AFFICHAGE D’UNE LIGNE PRODUIT
+    // 4) AJOUTER UNE LIGNE DANS LE TABLEAU HTML
     function addProductRow(productData) {
       // productData = { id, name, category, seuilOrange, seuilRouge, stock }
       const tr = document.createElement("tr");
@@ -560,15 +560,15 @@
         </td>
       `;
 
-      // 4a) Bouton “Modifier”
+      // 4a) Clic sur “Modifier”
       const editBtn = tr.querySelector("td.actions .material-icons[title='Modifier']");
       editBtn.addEventListener("click", () => {
         editingDocId = productData.id;
         modalTitle.textContent = "Modifier le produit";
-        // Pré-remplir le formulaire (+ désactiver l’ID)
-        inputId.value        = productData.id;
-        inputName.value      = productData.name;
-        inputCategory.value  = productData.category;
+        // Pré-remplir le formulaire + désactiver l’ID
+        inputId.value         = productData.id;
+        inputName.value       = productData.name;
+        inputCategory.value   = productData.category;
         inputSeuilOrange.value = productData.seuilOrange;
         inputSeuilRouge.value  = productData.seuilRouge;
         inputId.disabled = true;
@@ -576,7 +576,7 @@
         inputName.focus();
       });
 
-      // 4b) Bouton “Supprimer”
+      // 4b) Clic sur “Supprimer”
       const deleteBtn = tr.querySelector("td.actions .material-icons[title='Supprimer']");
       deleteBtn.addEventListener("click", async () => {
         if (confirm(`Supprimer le produit “${productData.name}” ?`)) {
@@ -592,11 +592,11 @@
       productTbody.appendChild(tr);
     }
 
-    // 5) CHARGER TOUS LES PRODUITS (tri par __name__ = ordre de création)
+    // 5) CHARGEMENT INITIAL DE TOUS LES PRODUITS DEPUIS FIRESTORE
     async function loadAllProducts() {
-      productTbody.innerHTML = "";  // on vide le tableau HTML
+      productTbody.innerHTML = "";  // On vide le tableau HTML
 
-      // Requête Firestore triée par ID (asc) → plus ancien en premier
+      // Requête triée par nom de document "__name__" (ascendant, donc plus ancien d'abord)
       const q = query(produitsCol, orderBy("__name__", "asc"));
       try {
         const querySnapshot = await getDocs(q);
@@ -605,24 +605,24 @@
           const data = docSnap.data();
           const id   = docSnap.id;
           const prod = {
-            id:          id,
-            name:        data.name || "",
-            category:    data.category || "",
-            seuilOrange: data.seuilOrange || 0,
-            seuilRouge:  data.seuilRouge || 0,
-            stock:       data.stock || 0
+            id:           id,
+            name:         data.name || "",
+            category:     data.category || "",
+            seuilOrange:  data.seuilOrange || 0,
+            seuilRouge:   data.seuilRouge || 0,
+            stock:        data.stock || 0
           };
           products.push(prod);
         });
 
-        // On affiche chaque produit (plus ancien → en haut)
+        // On insère dans le tableau HTML du plus ancien au plus récent
         products.forEach(p => addProductRow(p));
       } catch (err) {
         console.error("Erreur lors du chargement des produits :", err);
       }
     }
 
-    // 6) OUVRE LE MODAL (pour ajout)
+    // 6) OUVERTURE DU MODAL POUR AJOUTER
     function openModal() {
       modalTitle.textContent = "Ajouter un produit";
       inputId.value = "";
@@ -635,7 +635,7 @@
       modalOverlay.style.display = "flex";
       inputId.focus();
     }
-    // 7) FERME LE MODAL
+    // 7) FERMETURE DU MODAL
     function closeModal() {
       modalOverlay.style.display = "none";
       editingDocId = null;
@@ -646,16 +646,16 @@
       if (e.target === modalOverlay) closeModal();
     });
 
-    // 8) TRACE L’ÉVÉNEMENT “Ajouter un produit” (bouton)
+    // 8) CLIC SUR “Ajouter un produit” → OUVRE LE MODAL
     btnAddProd.addEventListener("click", () => openModal());
 
-    // 9) CRÉER OU MODIFIER UN PRODUIT
+    // 9) CRÉATION OU MISE À JOUR D’UN DOCUMENT
     modalSave.addEventListener("click", async () => {
-      const id          = inputId.value.trim();
-      const name        = inputName.value.trim();
-      const category    = inputCategory.value;
-      const seuilOrange = parseInt(inputSeuilOrange.value, 10);
-      const seuilRouge  = parseInt(inputSeuilRouge.value, 10);
+      const id           = inputId.value.trim();
+      const name         = inputName.value.trim();
+      const category     = inputCategory.value;
+      const seuilOrange  = parseInt(inputSeuilOrange.value, 10);
+      const seuilRouge   = parseInt(inputSeuilRouge.value, 10);
 
       // 9a) Vérifications de base
       if (!id || !name || !category || isNaN(seuilOrange) || isNaN(seuilRouge)) {
@@ -665,17 +665,19 @@
 
       try {
         if (editingDocId) {
-          // Mise à jour d’un doc existant (on utilise editingDocId)
+          // Mise à jour (updateDoc) : on conserve l’ID existant
           const docRef = doc(db, "produits", editingDocId);
           await updateDoc(docRef, {
             name:        name,
             category:    category,
             seuilOrange: seuilOrange,
             seuilRouge:  seuilRouge
+            // On ne touche pas au “stock” ici
           });
         } else {
-          // Création d’un nouveau document
-          await addDoc(produitsCol, {
+          // Création d’un nouveau document AVEC L’ID SAISI
+          const docRef = doc(db, "produits", id);
+          await setDoc(docRef, {
             name:        name,
             category:    category,
             seuilOrange: seuilOrange,
@@ -684,16 +686,16 @@
           });
         }
 
-        // 9b) On recharge la liste, puis on ferme le modal
+        // 9b) Rechargement du tableau et fermeture du modal
         await loadAllProducts();
         closeModal();
       } catch (err) {
-        console.error("Erreur lors de l’enregistrement du produit :", err);
+        console.error("Erreur lors de l’enregistrement/modification :", err);
         alert("Une erreur est survenue. Vérifiez la console pour plus de détails.");
       }
     });
 
-    // 10) CHARGEMENT INITIAL
+    // 10) DÉMARRAGE : on charge tous les produits dès que le DOM est prêt
     window.addEventListener("DOMContentLoaded", () => {
       loadAllProducts();
     });
