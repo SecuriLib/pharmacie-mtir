@@ -400,7 +400,7 @@
   <div class="content">
     <div class="page-header">
       <h1>Ajouter un produit</h1>
-      <!-- NOTE : on passe par un ID “addBtn” pour attacher l’événement en JS -->
+      <!-- Ce bouton ouvre le modal via addEventListener en JavaScript -->
       <button id="addBtn">Ajouter un produit</button>
     </div>
 
@@ -459,20 +459,22 @@
        SCRIPT JAVASCRIPT (masquage admin-only + Firestore)
        ================================================ -->
   <script type="module">
-    // 1) IMPORT MODULAIRE DE FIREBASE v11
+    // ─────────────────────────────────────────────────────
+    // 1) IMPORT FIRESTORE (modulaire v11)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import {
       getFirestore,
       collection,
       getDocs,
-      setDoc,      // <-- au lieu de addDoc, on utilise setDoc pour ID personnalisé
+      setDoc,
       deleteDoc,
       doc,
       orderBy,
       query
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-    // 2) VOTRE CONFIG FIREBASE (remplacez par la vôtre)
+    // ─────────────────────────────────────────────────────
+    // 2) CONFIGURATION FIREBASE (remplacez-la par la vôtre)
     const firebaseConfig = {
       apiKey: "AIzaSyB-jAqqfgoJIuJkEWojc5LCGsRnWu6J3lQ",
       authDomain: "pharmacie-mtir-db.firebaseapp.com",
@@ -483,12 +485,14 @@
       measurementId: "G-TW0H23MKSJ"
     };
 
-    // 3) INITIALISER FIRESTORE
-    const app        = initializeApp(firebaseConfig);
-    const db         = getFirestore(app);
+    // ─────────────────────────────────────────────────────
+    // 3) INITIALISATION DE FIRESTORE
+    const app         = initializeApp(firebaseConfig);
+    const db          = getFirestore(app);
     const produitsCol = collection(db, "produits");
 
-    // --- Masquage des sections admin-only si besoin ---
+    // ─────────────────────────────────────────────────────
+    // 4) GESTION DU MASQUAGE DES ÉLÉMENTS “admin-only”
     function getQueryParams() {
       const params = {};
       window.location.search
@@ -509,7 +513,8 @@
       });
     }
 
-    // 4) RÉFÉRENCES AU DOM
+    // ─────────────────────────────────────────────────────
+    // 5) RÉFÉRENCES DANS LE DOM
     const productTbody     = document.getElementById("productTbody");
     const addBtn           = document.getElementById("addBtn");
     const modalOverlay     = document.getElementById("modalOverlay");
@@ -521,13 +526,16 @@
     const modalCancel      = document.getElementById("modalCancel");
     const modalSave        = document.getElementById("modalSave");
 
-    // 5) GÉNÉRATEUR D’ID UNIQUE (pour un ID custom)
+    // ─────────────────────────────────────────────────────
+    // 6) GÉNÈRE UNE CHAÎNE “ID” UNIQUE (timestamp + aléatoire)
     function generateId() {
       return "prod_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
     }
 
-    // 6) OUVRIR / FERMER LE MODAL
+    // ─────────────────────────────────────────────────────
+    // 7) OUVRIR / FERMER LE MODAL
     function openModal() {
+      // Génère un ID à chaque ouverture
       inputId.value         = generateId();
       inputName.value       = "";
       inputCategory.value   = "";
@@ -549,42 +557,8 @@
       }
     });
 
-    // 7) AJOUTER UN PRODUIT DANS FIRESTORE (avec setDoc pour ID custom)
-    modalSave.addEventListener("click", async () => {
-      const id          = inputId.value.trim();
-      const name        = inputName.value.trim();
-      const category    = inputCategory.value;
-      const seuilOrange = parseInt(inputSeuilOrange.value, 10);
-      const seuilRouge  = parseInt(inputSeuilRouge.value, 10);
-
-      // Vérifications basiques
-      if (!id || !name || !category || isNaN(seuilOrange) || isNaN(seuilRouge)) {
-        alert("Veuillez remplir tous les champs avec des valeurs valides.");
-        return;
-      }
-
-      // On crée l’objet produit (initial stock à 0)
-      const newProduct = {
-        name: name,
-        category: category,
-        seuilOrange: seuilOrange,
-        seuilRouge: seuilRouge,
-        stock: 0
-      };
-
-      try {
-        // Utilisation de setDoc pour imposer l’ID dans Firestore
-        await setDoc(doc(db, "produits", id), newProduct);
-
-        // Mise à jour immédiate du tableau
-        addProductRow({ id: id, ...newProduct });
-        closeModal();
-      } catch (err) {
-        console.error("Erreur lors de l’ajout du produit :", err);
-      }
-    });
-
-    // 8) SUPPRIMER UN PRODUIT DE FIRESTORE
+    // ─────────────────────────────────────────────────────
+    // 8) FONCTION POUR AJOUTER UNE LIGNE DANS LE TABLEAU <tbody>
     function addProductRow(product) {
       const tr = document.createElement("tr");
       tr.dataset.id = product.id;
@@ -600,13 +574,14 @@
         </td>
       `;
 
+      // Si l’utilisateur clique sur la corbeille → on supprime de Firestore
       tr.querySelector("td.actions .material-icons").addEventListener("click", async () => {
         if (confirm("Supprimer ce produit définitivement ?")) {
           try {
             await deleteDoc(doc(db, "produits", product.id));
             tr.remove();
           } catch (err) {
-            console.error("Erreur lors de la suppression :", err);
+            console.error("Erreur lors de la suppression du produit :", err);
           }
         }
       });
@@ -614,20 +589,70 @@
       productTbody.appendChild(tr);
     }
 
-    // 9) CHARGER TOUS LES PRODUITS EXISTANTS AU DÉMARRAGE
+    // ─────────────────────────────────────────────────────
+    // 9) CHARGE TOUS LES PRODUITS DE FIRESTORE AU DÉMARRAGE
     async function loadAllProducts() {
-      productTbody.innerHTML = ""; // vider le tableau
-      const q = query(produitsCol, orderBy("name", "asc"));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach(docSnap => {
-        const productData = { id: docSnap.id, ...docSnap.data() };
-        addProductRow(productData);
-      });
+      productTbody.innerHTML = ""; 
+      // On veut trier par “name” (croissant)
+      const q = query(produitsCol, orderBy("name", "asc")); 
+      try {
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          addProductRow({
+            id: docSnap.id,
+            name: data.name,
+            category: data.category,
+            seuilOrange: data.seuilOrange,
+            seuilRouge: data.seuilRouge
+          });
+        });
+      } catch (err) {
+        console.error("Erreur lors du chargement des produits :", err);
+      }
     }
 
-    // 10) LIAISON DU BOUTON “Ajouter un produit” AVEC openModal()
+    // ─────────────────────────────────────────────────────
+    // 10) QUAND ON CLIQUE SUR “Enregistrer” DANS LE MODAL
+    modalSave.addEventListener("click", async () => {
+      const id          = inputId.value.trim();
+      const name        = inputName.value.trim();
+      const category    = inputCategory.value;
+      const seuilOrange = parseInt(inputSeuilOrange.value, 10);
+      const seuilRouge  = parseInt(inputSeuilRouge.value, 10);
+
+      // Validation basique :
+      if (!id || !name || !category || isNaN(seuilOrange) || isNaN(seuilRouge)) {
+        alert("Veuillez remplir tous les champs avant d’enregistrer !");
+        return;
+      }
+
+      // Création de l’objet produit (on ne laisse aucun champ “undefined”)
+      const newProduct = {
+        name: name,
+        category: category,
+        seuilOrange: seuilOrange,
+        seuilRouge: seuilRouge,
+        stock: 0    // on initialise le stock à 0 par défaut
+      };
+
+      try {
+        // On utilise setDoc au lieu de addDoc, afin d’imposer l’ID généré
+        await setDoc(doc(db, "produits", id), newProduct);
+
+        // On ajoute immédiatement au tableau localement (UX instantanée)
+        addProductRow({ id, ...newProduct });
+        closeModal();
+      } catch (err) {
+        console.error("Erreur lors de l’enregistrement du produit :", err);
+      }
+    });
+
+    // ─────────────────────────────────────────────────────
+    // 11) LIAISON DU BOUTON “Ajouter un produit”
     addBtn.addEventListener("click", openModal);
 
+    // 12) AU CHARGEMENT DE LA PAGE, ON REMPLIT LE TABLEAU
     window.addEventListener("DOMContentLoaded", () => {
       loadAllProducts();
     });
