@@ -49,6 +49,11 @@
       --modal-overlay: rgba(0, 0, 0, 0.4);
       --modal-bg: #ffffff;
       --category-bg: #eef3f7;
+
+      /* Styles pour la barre de recherche */
+      --search-bg: #f0f4f8;
+      --search-border: #d1d7de;
+      --search-placeholder: #8a8f97;
     }
 
     /* ================================
@@ -193,7 +198,7 @@
       margin-bottom: 24px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      justify-content: space-between;
     }
     .page-header h1 {
       font-size: 28px;
@@ -201,14 +206,31 @@
       flex-shrink: 0;
     }
 
-    /* Champ de recherche */
+    /* ================================
+       BARRE DE RECHERCHE
+       ================================ */
     #searchInput {
-      flex-grow: 1;
-      max-width: 300px;
-      padding: 8px 12px;
+      width: 280px;
+      max-width: 40%;
+      padding: 8px 36px 8px 12px;
       font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      border: 1px solid var(--search-border);
+      border-radius: 20px;
+      background-color: var(--search-bg);
+      color: #333;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%238a8f97" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM 4.5 9.5 A 5 5 0 1 1 14.5 9.5 A 5 5 0 0 1 4.5 9.5Z"/></svg>');
+      background-repeat: no-repeat;
+      background-size: 20px 20px;
+      background-position: right 10px center;
+    }
+    #searchInput::placeholder {
+      color: var(--search-placeholder);
+    }
+    #searchInput:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 4px rgba(75, 158, 255, 0.4);
     }
 
     /* ================================
@@ -417,8 +439,12 @@
   <div class="content">
     <div class="page-header">
       <h1>Gestion du Stock</h1>
-      <!-- Champ de recherche -->
-      <input type="text" id="searchInput" placeholder="🔍 Rechercher un produit…" />
+      <!-- Champ de recherche à droite, style plus arrondi + icône -->
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Rechercher un produit…"
+      />
     </div>
 
     <table class="stock-table">
@@ -453,15 +479,14 @@
   <!-- ==============================================
        SCRIPT JAVASCRIPT (MODULE FIRESTORE + FILTRAGE)
        ================================================
-       Cette section gère :
        1. Masquage “admin-only”
-       2. Récupération et affichage des produits (tri par ID pour respecter l’ordre de création)
-       3. Groupement visuel par catégorie
+       2. Chargement et affichage (tri par ordre de création via __name__)
+       3. Groupement par catégorie
        4. Mise à jour du champ “stock” dans Firestore
-       5. Filtrage en temps réel via le champ #searchInput
+       5. Filtrage en temps réel avec #searchInput
   -->
   <script type="module">
-    // 1) IMPORT FIRESTORE (ES Modules v11)
+    // 1) IMPORT FIREBASE (v11)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import {
       getFirestore,
@@ -489,7 +514,7 @@
     const db  = getFirestore(app);
     const produitsCol = collection(db, "produits");
 
-    // 4) MASQUAGE “admin-only” SI ROLE ≠ admin
+    // 4) MASQUAGE “admin-only”
     function getQueryParams() {
       const params = {};
       window.location.search
@@ -519,7 +544,7 @@
     const searchInput  = document.getElementById("searchInput");
     let activeRow = null; // <tr> en cours d’édition
 
-    // 6) AJOUTER UNE LIGNE “CATÉGORIE” AU DÉBUT DE CHAQUE GROUPE
+    // 6) AJOUTER LIGNE CATÉGORIE
     function addCategoryRow(category) {
       const trCat = document.createElement("tr");
       trCat.classList.add("category-row");
@@ -529,9 +554,9 @@
       stockTbody.appendChild(trCat);
     }
 
-    // 7) AJOUTER UNE LIGNE “PRODUIT” DANS LE TABLEAU
+    // 7) AJOUTER LIGNE PRODUIT
     function addProductRow(productData) {
-      // productData = {id, name, category, stock}
+      // productData = { id, name, category, stock }
       const trMain = document.createElement("tr");
       trMain.dataset.id = productData.id;
 
@@ -544,7 +569,7 @@
         </td>
       `;
 
-      // Quand on clique sur “edit”
+      // 7a) Clic sur “edit” → ouvre le modal
       trMain.querySelector("td.edit .material-icons").addEventListener("click", () => {
         activeRow = trMain;
         modalInput.value = trMain.querySelector("td.stock").textContent.trim();
@@ -555,19 +580,19 @@
       stockTbody.appendChild(trMain);
     }
 
-    // 8) LIRE TOUS LES PRODUITS DEPUIS FIRESTORE (TRI PAR “__name__”)
+    // 8) CHARGER TOUS LES PRODUITS (tri par ID Firestore = ordre de création)
     async function loadAllProducts() {
-      stockTbody.innerHTML = ""; // on vide d’abord le <tbody>
-      // Tri par ID du document (donc ordre de création le plus ancien → en haut)
-      const q = query(produitsCol, orderBy("__name__", "asc"));
+      stockTbody.innerHTML = ""; // on vide le <tbody>
 
+      // Requête triée par __name__ (ID) en ordre ascendant
+      const q = query(produitsCol, orderBy("__name__", "asc"));
       try {
         const querySnapshot = await getDocs(q);
         let lastCategory = null;
 
         querySnapshot.forEach(docSnap => {
           const data = docSnap.data();
-          const id   = docSnap.id;
+          const id = docSnap.id;
           const stockValue = typeof data.stock === "number" ? data.stock : 0;
           const prod = {
             id:       id,
@@ -576,49 +601,42 @@
             stock:    stockValue
           };
 
-          // Si nouvelle catégorie, on insère une ligne “Catégorie : …”
+          // Si nouvelle catégorie, on insère la ligne d’intitulé
           if (prod.category !== lastCategory) {
             addCategoryRow(prod.category);
             lastCategory = prod.category;
           }
 
-          // On ajoute la ligne du produit
+          // On place la ligne produit
           addProductRow(prod);
         });
 
-        // Après avoir ajouté toutes les lignes, on déclenche le filtrage initial
+        // Une fois l’affichage effectué, on déclenche le filtrage
         filterTable();
       } catch (err) {
         console.error("Erreur lors du chargement des produits :", err);
       }
     }
 
-    // 9) FILTRER LE TABLEAU EN FONCTION DE #searchInput
+    // 9) FILTRER LE TABLEAU EN TEMPS RÉEL
     function filterTable() {
       const filterValue = searchInput.value.trim().toLowerCase();
-
-      // 1) Récupère toutes les lignes <tr> du <tbody>
       const allRows = Array.from(stockTbody.querySelectorAll("tr"));
-
-      // 2) On itère sur chaque "bloc catégorie + ses produits"
-      //    Pour chaque catégorie, on collecte d’abord la ligne de catégorie
-      //    puis toutes les lignes “produit” qui la suivent, jusqu’à la prochaine ligne .category-row ou fin de tableau.
       let i = 0;
+
       while (i < allRows.length) {
         const row = allRows[i];
         if (row.classList.contains("category-row")) {
-          // 2a) C'est une ligne “Catégorie”
+          // Ligne catégorie → on recherche toutes les lignes produit suivantes
           const catRow = row;
           let j = i + 1;
           let anyChildVisible = false;
 
-          // 2b) On parcourt toutes les lignes “produit” jusqu’à la prochaine category-row
           while (j < allRows.length && !allRows[j].classList.contains("category-row")) {
             const prodRow = allRows[j];
-            const prodNameCell = prodRow.querySelector(".cell-name");
-            const nameText = prodNameCell ? prodNameCell.textContent.trim().toLowerCase() : "";
+            const nameCell = prodRow.querySelector(".cell-name");
+            const nameText = nameCell ? nameCell.textContent.trim().toLowerCase() : "";
 
-            // Si la recherche est vide OU que le nom contient la chaîne, on affiche
             if (filterValue === "" || nameText.includes(filterValue)) {
               prodRow.style.display = "";
               anyChildVisible = true;
@@ -628,20 +646,15 @@
             j++;
           }
 
-          // 2c) Si aucun des enfants n'est visible, on cache la ligne de catégorie
-          if (anyChildVisible) {
-            catRow.style.display = "";
-          } else {
-            catRow.style.display = "none";
-          }
-
-          // Passe à l’index suivant pour examiner le bloc suivant
+          // Si aucun enfant produit n’est visible, on cache la ligne catégorie
+          catRow.style.display = anyChildVisible ? "" : "none";
           i = j;
         } else {
-          // Au cas où il existerait une ligne produit sans catégorie à l’avant, on la filtre quand même :
+          // Ligne produit isolée (au cas où) → on la filtre aussi
           const prodRow = row;
-          const prodNameCell = prodRow.querySelector(".cell-name");
-          const nameText = prodNameCell ? prodNameCell.textContent.trim().toLowerCase() : "";
+          const nameCell = prodRow.querySelector(".cell-name");
+          const nameText = nameCell ? nameCell.textContent.trim().toLowerCase() : "";
+
           if (filterValue === "" || nameText.includes(filterValue)) {
             prodRow.style.display = "";
           } else {
@@ -654,35 +667,29 @@
 
     searchInput.addEventListener("input", filterTable);
 
-    // 10) MISE À JOUR DU CHAMP “stock” DANS FIRESTORE
+    // 10) GESTION DU MODAL + MISE À JOUR DU STOCK
     function closeModal() {
       modalOverlay.style.display = "none";
       activeRow = null;
     }
     modalCancel.addEventListener("click", () => closeModal());
-
-    modalOverlay.addEventListener("click", (e) => {
-      if (e.target === modalOverlay) {
-        closeModal();
-      }
+    modalOverlay.addEventListener("click", e => {
+      if (e.target === modalOverlay) closeModal();
     });
 
     modalSave.addEventListener("click", async () => {
       if (!activeRow) return;
-
       const newQty = parseInt(modalInput.value, 10);
       if (isNaN(newQty) || newQty < 0) {
         alert("Veuillez entrer un nombre entier ≥ 0.");
         return;
       }
-
       const id = activeRow.dataset.id;
       try {
         const docRef = doc(db, "produits", id);
         await updateDoc(docRef, { stock: newQty });
-
-        // Met à jour immédiatement la ligne active
-        activeRow.querySelector("td.stock").textContent   = newQty;
+        // Mise à jour visuelle
+        activeRow.querySelector("td.stock").textContent = newQty;
         activeRow.querySelector("td.current").textContent = newQty;
         closeModal();
       } catch (err) {
@@ -690,7 +697,7 @@
       }
     });
 
-    // 11) DÉCLENCHEMENT DU CHARGEMENT AU DÉMARRAGE
+    // 11) AU CHARGEMENT DE LA PAGE → on lance loadAllProducts()
     window.addEventListener("DOMContentLoaded", () => {
       loadAllProducts();
     });

@@ -207,10 +207,17 @@
       padding: 10px 16px;
       font-size: 14px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       transition: background-color 0.2s;
     }
     .page-header button:hover {
       background-color: #3a8ee6;
+    }
+    .page-header button .material-icons {
+      font-size: 18px;
+      vertical-align: middle;
     }
 
     /* ================================
@@ -245,7 +252,10 @@
     }
     .product-table td.actions {
       text-align: center;
-      width: 48px;
+      width: 100px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
     }
     .product-table td.actions .material-icons {
       cursor: pointer;
@@ -400,7 +410,11 @@
   <div class="content">
     <div class="page-header">
       <h1>Ajouter un produit</h1>
-      <button onclick="openModal()">Ajouter un produit</button>
+      <!-- On ne met plus onclick inline, on utilisera addEventListener -->
+      <button id="btnAddProd">
+        <span class="material-icons">add_circle</span>
+        Ajouter un produit
+      </button>
     </div>
 
     <table class="product-table">
@@ -421,14 +435,14 @@
   </div>
 
   <!-- ==============================================
-       MODAL D'AJOUT DE PRODUIT
+       MODAL D'AJOUT / MODIFICATION DE PRODUIT
        ================================================ -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
-      <h2>Ajouter un produit</h2>
+      <h2 id="modalTitle">Ajouter un produit</h2>
 
-      <label for="inputId">ID (par ex. “prod_123456…”):</label>
-      <input type="text" id="inputId" />
+      <label for="inputId">ID (à définir soi-même) :</label>
+      <input type="text" id="inputId" placeholder="ex. prod_123456_abc" />
 
       <label for="inputName">Nom du produit :</label>
       <input type="text" id="inputName" />
@@ -439,7 +453,7 @@
         <option value="Étage 1">Étage 1</option>
         <option value="Étage 2">Étage 2</option>
         <option value="Étage 3">Étage 3</option>
-        <option value="Étage 4">Étage 4</option> <!-- Quatrième étage ajouté -->
+        <option value="Étage 4">Étage 4</option>
       </select>
 
       <label for="inputSeuilOrange">Seuil orange :</label>
@@ -457,7 +471,12 @@
 
   <!-- ==============================================
        SCRIPT JAVASCRIPT (MODULE FIRESTORE + CRUD PRODUIT)
-       ================================================ -->
+       ================================================
+       1. Masquage “admin-only”
+       2. CRUD (Création/Modification/Suppression) dans Firestore
+       3. Tri par ordre de création (orderBy("__name__", "asc"))
+       4. Attribution de event listeners (au lieu d’onclick inline)
+  -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import {
@@ -472,7 +491,7 @@
       query
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-    // 1) CONFIG FIREBASE (à adapter si besoin)
+    // 1) CONFIG FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyB-jAqqfgoJIuJkEWojc5LCGsRnWu6J3lQ",
       authDomain: "pharmacie-mtir-db.firebaseapp.com",
@@ -508,20 +527,22 @@
     }
 
     // 3) RÉFÉRENCES AU DOM
-    const productTbody   = document.getElementById("productTbody");
-    const modalOverlay   = document.getElementById("modalOverlay");
-    const inputId        = document.getElementById("inputId");
-    const inputName      = document.getElementById("inputName");
-    const inputCategory  = document.getElementById("inputCategory");
+    const btnAddProd    = document.getElementById("btnAddProd");
+    const productTbody  = document.getElementById("productTbody");
+    const modalOverlay  = document.getElementById("modalOverlay");
+    const modalTitle    = document.getElementById("modalTitle");
+    const inputId       = document.getElementById("inputId");
+    const inputName     = document.getElementById("inputName");
+    const inputCategory = document.getElementById("inputCategory");
     const inputSeuilOrange = document.getElementById("inputSeuilOrange");
     const inputSeuilRouge  = document.getElementById("inputSeuilRouge");
-    const modalCancel    = document.getElementById("modalCancel");
-    const modalSave      = document.getElementById("modalSave");
+    const modalCancel   = document.getElementById("modalCancel");
+    const modalSave     = document.getElementById("modalSave");
 
-    let products = []; // Contiendra la liste des produits lus depuis Firestore
-    let editingDocId = null; // Si on est en modification, champ document.id ; sinon null
+    let products       = [];    // contiendra la liste des produits Firestore
+    let editingDocId   = null;  // si on édite, l’ID du doc, sinon null
 
-    // 4) FONCTION D’AFFICHAGE D’UNE LIGNE PRODUIT DANS LE TABLEAU
+    // 4) AFFICHAGE D’UNE LIGNE PRODUIT
     function addProductRow(productData) {
       // productData = { id, name, category, seuilOrange, seuilRouge, stock }
       const tr = document.createElement("tr");
@@ -539,30 +560,29 @@
         </td>
       `;
 
-      // 4a) Quand on clique sur “Modifier”
+      // 4a) Bouton “Modifier”
       const editBtn = tr.querySelector("td.actions .material-icons[title='Modifier']");
       editBtn.addEventListener("click", () => {
         editingDocId = productData.id;
-        // Pré-remplit le formulaire
+        modalTitle.textContent = "Modifier le produit";
+        // Pré-remplir le formulaire (+ désactiver l’ID)
         inputId.value        = productData.id;
         inputName.value      = productData.name;
         inputCategory.value  = productData.category;
         inputSeuilOrange.value = productData.seuilOrange;
         inputSeuilRouge.value  = productData.seuilRouge;
-        // On désactive l’input ID pour éviter de le modifier
         inputId.disabled = true;
-        // Ouvre le modal
         modalOverlay.style.display = "flex";
         inputName.focus();
       });
 
-      // 4b) Quand on clique sur “Supprimer”
+      // 4b) Bouton “Supprimer”
       const deleteBtn = tr.querySelector("td.actions .material-icons[title='Supprimer']");
       deleteBtn.addEventListener("click", async () => {
         if (confirm(`Supprimer le produit “${productData.name}” ?`)) {
           try {
             await deleteDoc(doc(db, "produits", productData.id));
-            loadAllProducts(); // on recharge la liste
+            loadAllProducts();
           } catch (err) {
             console.error("Erreur lors de la suppression :", err);
           }
@@ -572,15 +592,15 @@
       productTbody.appendChild(tr);
     }
 
-    // 5) CHARGER TOUS LES PRODUITS DEPUIS FIRESTORE (tri par “__name__” pour l’ordre de création)
+    // 5) CHARGER TOUS LES PRODUITS (tri par __name__ = ordre de création)
     async function loadAllProducts() {
-      productTbody.innerHTML = ""; // on vide l'<tbody>'
+      productTbody.innerHTML = "";  // on vide le tableau HTML
 
-      // On crée une requête triée par __name__ (ID) en ordre ascendant
+      // Requête Firestore triée par ID (asc) → plus ancien en premier
       const q = query(produitsCol, orderBy("__name__", "asc"));
       try {
         const querySnapshot = await getDocs(q);
-        products = []; // réinitialisation du tableau local
+        products = [];
         querySnapshot.forEach(docSnap => {
           const data = docSnap.data();
           const id   = docSnap.id;
@@ -594,16 +614,17 @@
           };
           products.push(prod);
         });
-        // On affiche chaque produit dans l’ordre (plus ancien → premier)
+
+        // On affiche chaque produit (plus ancien → en haut)
         products.forEach(p => addProductRow(p));
       } catch (err) {
         console.error("Erreur lors du chargement des produits :", err);
       }
     }
 
-    // 6) OUVERTURE / FERMETURE DU MODAL
+    // 6) OUVRE LE MODAL (pour ajout)
     function openModal() {
-      // Remise à zéro du formulaire
+      modalTitle.textContent = "Ajouter un produit";
       inputId.value = "";
       inputName.value = "";
       inputCategory.value = "";
@@ -614,6 +635,7 @@
       modalOverlay.style.display = "flex";
       inputId.focus();
     }
+    // 7) FERME LE MODAL
     function closeModal() {
       modalOverlay.style.display = "none";
       editingDocId = null;
@@ -624,7 +646,10 @@
       if (e.target === modalOverlay) closeModal();
     });
 
-    // 7) CRÉER OU METTRE À JOUR UN PRODUIT AU CLIC “Enregistrer”
+    // 8) TRACE L’ÉVÉNEMENT “Ajouter un produit” (bouton)
+    btnAddProd.addEventListener("click", () => openModal());
+
+    // 9) CRÉER OU MODIFIER UN PRODUIT
     modalSave.addEventListener("click", async () => {
       const id          = inputId.value.trim();
       const name        = inputName.value.trim();
@@ -632,7 +657,7 @@
       const seuilOrange = parseInt(inputSeuilOrange.value, 10);
       const seuilRouge  = parseInt(inputSeuilRouge.value, 10);
 
-      // 7a) Validation rapide
+      // 9a) Vérifications de base
       if (!id || !name || !category || isNaN(seuilOrange) || isNaN(seuilRouge)) {
         alert("Merci de remplir tous les champs correctement.");
         return;
@@ -640,7 +665,7 @@
 
       try {
         if (editingDocId) {
-          // On met à jour le document existant
+          // Mise à jour d’un doc existant (on utilise editingDocId)
           const docRef = doc(db, "produits", editingDocId);
           await updateDoc(docRef, {
             name:        name,
@@ -649,8 +674,7 @@
             seuilRouge:  seuilRouge
           });
         } else {
-          // On crée un nouveau document avec l’ID saisi
-          // On initialise stock à 0 par défaut
+          // Création d’un nouveau document
           await addDoc(produitsCol, {
             name:        name,
             category:    category,
@@ -660,16 +684,16 @@
           });
         }
 
-        // On rafraîchit la liste et on ferme le modal
+        // 9b) On recharge la liste, puis on ferme le modal
         await loadAllProducts();
         closeModal();
       } catch (err) {
         console.error("Erreur lors de l’enregistrement du produit :", err);
-        alert("Une erreur est survenue. Vérifiez la console.");
+        alert("Une erreur est survenue. Vérifiez la console pour plus de détails.");
       }
     });
 
-    // 8) CHARGER L’ÉCRAN AU DÉMARRAGE
+    // 10) CHARGEMENT INITIAL
     window.addEventListener("DOMContentLoaded", () => {
       loadAllProducts();
     });
