@@ -191,10 +191,24 @@
 
     .page-header {
       margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
     .page-header h1 {
       font-size: 28px;
       color: #34495e;
+      flex-shrink: 0;
+    }
+
+    /* Champ de recherche */
+    #searchInput {
+      flex-grow: 1;
+      max-width: 300px;
+      padding: 8px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
 
     /* ================================
@@ -403,6 +417,8 @@
   <div class="content">
     <div class="page-header">
       <h1>Gestion du Stock</h1>
+      <!-- Champ de recherche -->
+      <input type="text" id="searchInput" placeholder="🔍 Rechercher un produit…" />
     </div>
 
     <table class="stock-table">
@@ -435,13 +451,14 @@
   </div>
 
   <!-- ==============================================
-       SCRIPT JAVASCRIPT (MODULE FIRESTORE)
+       SCRIPT JAVASCRIPT (MODULE FIRESTORE + FILTRAGE)
        ================================================
        Cette section gère :
-       1. Masquage du contenu “admin-only” si rôle ≠ admin
-       2. Lecture des produits depuis Firestore (ordonnés par ID, donc par date de création)
-       3. Affichage groupé par catégorie
+       1. Masquage “admin-only”
+       2. Récupération et affichage des produits (tri par ID pour respecter l’ordre de création)
+       3. Groupement visuel par catégorie
        4. Mise à jour du champ “stock” dans Firestore
+       5. Filtrage en temps réel via le champ #searchInput
   -->
   <script type="module">
     // 1) IMPORT FIRESTORE (ES Modules v11)
@@ -456,7 +473,7 @@
       query
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-    // 2) VOTRE CONFIG FIREBASE (remplacez par la vôtre)
+    // 2) VOTRE CONFIG FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyB-jAqqfgoJIuJkEWojc5LCGsRnWu6J3lQ",
       authDomain: "pharmacie-mtir-db.firebaseapp.com",
@@ -470,10 +487,9 @@
     // 3) INITIALISATION DE FIRESTORE
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
-    // Référence à la collection “produits”
     const produitsCol = collection(db, "produits");
 
-    // 4) MASQUAGE “admin-only” SI rôle ≠ admin
+    // 4) MASQUAGE “admin-only” SI ROLE ≠ admin
     function getQueryParams() {
       const params = {};
       window.location.search
@@ -500,7 +516,8 @@
     const modalInput   = document.getElementById("modalInput");
     const modalCancel  = document.getElementById("modalCancel");
     const modalSave    = document.getElementById("modalSave");
-    let activeRow = null; // <tr> actuellement en cours d’édition
+    const searchInput  = document.getElementById("searchInput");
+    let activeRow = null; // <tr> en cours d’édition
 
     // 6) AJOUTER UNE LIGNE “CATÉGORIE” AU DÉBUT DE CHAQUE GROUPE
     function addCategoryRow(category) {
@@ -514,12 +531,12 @@
 
     // 7) AJOUTER UNE LIGNE “PRODUIT” DANS LE TABLEAU
     function addProductRow(productData) {
-      // productData contient : { id, name, category, stock }
+      // productData = {id, name, category, stock}
       const trMain = document.createElement("tr");
       trMain.dataset.id = productData.id;
 
       trMain.innerHTML = `
-        <td>${productData.name}</td>
+        <td class="cell-name">${productData.name}</td>
         <td class="stock">${productData.stock}</td>
         <td class="current">${productData.stock}</td>
         <td class="edit">
@@ -527,10 +544,9 @@
         </td>
       `;
 
-      // Quand on clique sur l’icône “edit”, on affiche le modal
+      // Quand on clique sur “edit”
       trMain.querySelector("td.edit .material-icons").addEventListener("click", () => {
         activeRow = trMain;
-        // Pré-remplir l’input du modal avec la valeur actuelle du stock
         modalInput.value = trMain.querySelector("td.stock").textContent.trim();
         modalOverlay.style.display = "flex";
         modalInput.focus();
@@ -539,18 +555,11 @@
       stockTbody.appendChild(trMain);
     }
 
-    // 8) CHARGER LES PRODUITS DEPUIS FIRESTORE
+    // 8) LIRE TOUS LES PRODUITS DEPUIS FIRESTORE (TRI PAR “__name__”)
     async function loadAllProducts() {
-      // Vider le <tbody> avant d’y insérer les nouvelles lignes
-      stockTbody.innerHTML = "";
-
-      // On trie par "__name__" (ID du document). 
-      // Les IDs sont du format "prod_<timestamp>_…", donc orderBy("__name__", "asc")
-      // revient à trier dans l’ordre chronologique d’ajout (plus ancien → premier).
-      const q = query(
-        produitsCol,
-        orderBy("__name__", "asc")
-      );
+      stockTbody.innerHTML = ""; // on vide d’abord le <tbody>
+      // Tri par ID du document (donc ordre de création le plus ancien → en haut)
+      const q = query(produitsCol, orderBy("__name__", "asc"));
 
       try {
         const querySnapshot = await getDocs(q);
@@ -559,46 +568,105 @@
         querySnapshot.forEach(docSnap => {
           const data = docSnap.data();
           const id   = docSnap.id;
-          // Définir “stock” à 0 si non renseigné
           const stockValue = typeof data.stock === "number" ? data.stock : 0;
-
           const prod = {
             id:       id,
-            name:     data.name,
-            category: data.category,
+            name:     data.name || "",
+            category: data.category || "",
             stock:    stockValue
           };
 
-          // Si la catégorie vient de changer, on insère une ligne “Catégorie : …”
+          // Si nouvelle catégorie, on insère une ligne “Catégorie : …”
           if (prod.category !== lastCategory) {
             addCategoryRow(prod.category);
             lastCategory = prod.category;
           }
 
-          // Ajouter la ligne produit
+          // On ajoute la ligne du produit
           addProductRow(prod);
         });
+
+        // Après avoir ajouté toutes les lignes, on déclenche le filtrage initial
+        filterTable();
       } catch (err) {
         console.error("Erreur lors du chargement des produits :", err);
       }
     }
 
-    // 9) FERMETURE DU MODAL
+    // 9) FILTRER LE TABLEAU EN FONCTION DE #searchInput
+    function filterTable() {
+      const filterValue = searchInput.value.trim().toLowerCase();
+
+      // 1) Récupère toutes les lignes <tr> du <tbody>
+      const allRows = Array.from(stockTbody.querySelectorAll("tr"));
+
+      // 2) On itère sur chaque "bloc catégorie + ses produits"
+      //    Pour chaque catégorie, on collecte d’abord la ligne de catégorie
+      //    puis toutes les lignes “produit” qui la suivent, jusqu’à la prochaine ligne .category-row ou fin de tableau.
+      let i = 0;
+      while (i < allRows.length) {
+        const row = allRows[i];
+        if (row.classList.contains("category-row")) {
+          // 2a) C'est une ligne “Catégorie”
+          const catRow = row;
+          let j = i + 1;
+          let anyChildVisible = false;
+
+          // 2b) On parcourt toutes les lignes “produit” jusqu’à la prochaine category-row
+          while (j < allRows.length && !allRows[j].classList.contains("category-row")) {
+            const prodRow = allRows[j];
+            const prodNameCell = prodRow.querySelector(".cell-name");
+            const nameText = prodNameCell ? prodNameCell.textContent.trim().toLowerCase() : "";
+
+            // Si la recherche est vide OU que le nom contient la chaîne, on affiche
+            if (filterValue === "" || nameText.includes(filterValue)) {
+              prodRow.style.display = "";
+              anyChildVisible = true;
+            } else {
+              prodRow.style.display = "none";
+            }
+            j++;
+          }
+
+          // 2c) Si aucun des enfants n'est visible, on cache la ligne de catégorie
+          if (anyChildVisible) {
+            catRow.style.display = "";
+          } else {
+            catRow.style.display = "none";
+          }
+
+          // Passe à l’index suivant pour examiner le bloc suivant
+          i = j;
+        } else {
+          // Au cas où il existerait une ligne produit sans catégorie à l’avant, on la filtre quand même :
+          const prodRow = row;
+          const prodNameCell = prodRow.querySelector(".cell-name");
+          const nameText = prodNameCell ? prodNameCell.textContent.trim().toLowerCase() : "";
+          if (filterValue === "" || nameText.includes(filterValue)) {
+            prodRow.style.display = "";
+          } else {
+            prodRow.style.display = "none";
+          }
+          i++;
+        }
+      }
+    }
+
+    searchInput.addEventListener("input", filterTable);
+
+    // 10) MISE À JOUR DU CHAMP “stock” DANS FIRESTORE
     function closeModal() {
       modalOverlay.style.display = "none";
       activeRow = null;
     }
-    modalCancel.addEventListener("click", () => {
-      closeModal();
-    });
-    // Cliquer en dehors de la boîte du modal la referme
+    modalCancel.addEventListener("click", () => closeModal());
+
     modalOverlay.addEventListener("click", (e) => {
       if (e.target === modalOverlay) {
         closeModal();
       }
     });
 
-    // 10) MISE À JOUR DU CHAMP “stock” DANS FIRESTORE
     modalSave.addEventListener("click", async () => {
       if (!activeRow) return;
 
@@ -610,11 +678,10 @@
 
       const id = activeRow.dataset.id;
       try {
-        // Référence au document “produits/id” dans Firestore
         const docRef = doc(db, "produits", id);
         await updateDoc(docRef, { stock: newQty });
 
-        // Mettre à jour immédiatement la ligne active
+        // Met à jour immédiatement la ligne active
         activeRow.querySelector("td.stock").textContent   = newQty;
         activeRow.querySelector("td.current").textContent = newQty;
         closeModal();
@@ -623,7 +690,7 @@
       }
     });
 
-    // 11) CHARGER LES DONNÉES AU DÉMARRAGE
+    // 11) DÉCLENCHEMENT DU CHARGEMENT AU DÉMARRAGE
     window.addEventListener("DOMContentLoaded", () => {
       loadAllProducts();
     });

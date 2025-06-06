@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pharmacie MTIR – Ajouter / Modifier un produit</title>
+  <title>Pharmacie MTIR – Ajouter un produit</title>
 
   <!-- Roboto + Material Icons -->
   <link
@@ -243,27 +243,21 @@
     .product-table tr:hover {
       background-color: var(--table-row-hover);
     }
-.product-table td.actions {
-  display: flex;               /* Affiche en ligne les enfants */
-  justify-content: center;     /* Centre horizontalement */
-  align-items: center;         /* Centre verticalement */
-  gap: 8px;                    /* Espace entre les icônes */
-  white-space: nowrap;         /* Empêche le passage à la ligne */
-  padding: 0 8px;              /* Un peu de marge intérieure horizontale */
-}
-
-.product-table td.actions .material-icons {
-  cursor: pointer;
-  color: var(--icon-color);
-  transition: color 0.2s;
-}
-.product-table td.actions .material-icons:hover {
-  color: var(--accent-color);
-}
-
+    .product-table td.actions {
+      text-align: center;
+      width: 48px;
+    }
+    .product-table td.actions .material-icons {
+      cursor: pointer;
+      color: var(--icon-color);
+      transition: color 0.2s;
+    }
+    .product-table td.actions .material-icons:hover {
+      color: var(--accent-color);
+    }
 
     /* ================================
-       MODAL (Ajout / Modification)
+       MODAL
        ================================ */
     .modal-overlay {
       position: fixed;
@@ -296,7 +290,6 @@
       font-size: 14px;
       color: var(--heading-color);
       margin-bottom: 4px;
-      margin-top: 12px;
     }
     .modal input[type="text"],
     .modal input[type="number"],
@@ -306,7 +299,7 @@
       font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 6px;
-      margin-bottom: 8px;
+      margin-bottom: 16px;
     }
     .modal button {
       padding: 10px 16px;
@@ -365,7 +358,7 @@
           <li>
             <a href="produit.html?role=admin" class="active">
               <span class="material-icons">add_box</span>
-              <span class="link-text">Ajouter / Modifier</span>
+              <span class="link-text">Ajouter un produit</span>
             </a>
           </li>
         </ul>
@@ -402,12 +395,11 @@
   </aside>
 
   <!-- ==============================================
-       CONTENU PRINCIPAL (Ajouter / Modifier un produit)
+       CONTENU PRINCIPAL (Ajouter un produit)
        ================================================ -->
   <div class="content">
     <div class="page-header">
-      <h1>Ajouter / Modifier un produit</h1>
-      <!-- Ce bouton appelle désormais `window.openModal()`, exposée plus bas -->
+      <h1>Ajouter un produit</h1>
       <button onclick="openModal()">Ajouter un produit</button>
     </div>
 
@@ -429,17 +421,17 @@
   </div>
 
   <!-- ==============================================
-       MODAL D'AJOUT / MODIFICATION
+       MODAL D'AJOUT DE PRODUIT
        ================================================ -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
-      <h2 id="modalTitle">Ajouter un produit</h2>
+      <h2>Ajouter un produit</h2>
 
-      <label for="inputId">ID :</label>
-      <input type="text" id="inputId" placeholder="Ex : produit-001" />
+      <label for="inputId">ID (par ex. “prod_123456…”):</label>
+      <input type="text" id="inputId" />
 
       <label for="inputName">Nom du produit :</label>
-      <input type="text" id="inputName" placeholder="Ex : Bandages stériles" />
+      <input type="text" id="inputName" />
 
       <label for="inputCategory">Catégorie :</label>
       <select id="inputCategory">
@@ -447,52 +439,54 @@
         <option value="Étage 1">Étage 1</option>
         <option value="Étage 2">Étage 2</option>
         <option value="Étage 3">Étage 3</option>
+        <option value="Étage 4">Étage 4</option> <!-- Quatrième étage ajouté -->
       </select>
 
       <label for="inputSeuilOrange">Seuil orange :</label>
-      <input type="number" id="inputSeuilOrange" min="0" placeholder="Ex : 10" />
+      <input type="number" id="inputSeuilOrange" min="0" />
 
       <label for="inputSeuilRouge">Seuil rouge :</label>
-      <input type="number" id="inputSeuilRouge" min="0" placeholder="Ex : 5" />
+      <input type="number" id="inputSeuilRouge" min="0" />
 
-      <div style="margin-top: 16px;">
+      <div>
         <button class="btn-cancel" id="modalCancel">Annuler</button>
-        <button class="btn-save"   id="modalSave">Enregistrer</button>
+        <button class="btn-save" id="modalSave">Enregistrer</button>
       </div>
     </div>
   </div>
 
   <!-- ==============================================
-       SCRIPT JAVASCRIPT (Firebase + CRUD)
-       ============================================= -->
+       SCRIPT JAVASCRIPT (MODULE FIRESTORE + CRUD PRODUIT)
+       ================================================ -->
   <script type="module">
-    // 1) Import des modules Firebase nécessaires
-    import { initializeApp } 
-      from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import {
       getFirestore,
       collection,
       getDocs,
-      setDoc,
-      doc,
+      addDoc,
+      updateDoc,
       deleteDoc,
-      getDoc
+      doc,
+      orderBy,
+      query
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-    // 2) Configuration & initialisation Firebase
+    // 1) CONFIG FIREBASE (à adapter si besoin)
     const firebaseConfig = {
       apiKey: "AIzaSyB-jAqqfgoJIuJkEWojc5LCGsRnWu6J3lQ",
       authDomain: "pharmacie-mtir-db.firebaseapp.com",
       projectId: "pharmacie-mtir-db",
-      storageBucket: "pharmacie-mtir-db.appspot.com",
+      storageBucket: "pharmacie-mtir-db.firebasestorage.app",
       messagingSenderId: "840095043695",
       appId: "1:840095043695:web:5841203196acfd400c7d9a",
       measurementId: "G-TW0H23MKSJ"
     };
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
+    const produitsCol = collection(db, "produits");
 
-    // 3) Gestion du rôle (masquage des nav-group admin-only si non-admin)
+    // 2) MASQUAGE “admin-only”
     function getQueryParams() {
       const params = {};
       window.location.search
@@ -513,124 +507,124 @@
       });
     }
 
-    // 4) Références DOM
-    const productTbody     = document.getElementById("productTbody");
-    const modalOverlay     = document.getElementById("modalOverlay");
-    const modalTitle       = document.getElementById("modalTitle");
-    const inputId          = document.getElementById("inputId");
-    const inputName        = document.getElementById("inputName");
-    const inputCategory    = document.getElementById("inputCategory");
+    // 3) RÉFÉRENCES AU DOM
+    const productTbody   = document.getElementById("productTbody");
+    const modalOverlay   = document.getElementById("modalOverlay");
+    const inputId        = document.getElementById("inputId");
+    const inputName      = document.getElementById("inputName");
+    const inputCategory  = document.getElementById("inputCategory");
     const inputSeuilOrange = document.getElementById("inputSeuilOrange");
     const inputSeuilRouge  = document.getElementById("inputSeuilRouge");
-    const modalCancel      = document.getElementById("modalCancel");
-    const modalSave        = document.getElementById("modalSave");
+    const modalCancel    = document.getElementById("modalCancel");
+    const modalSave      = document.getElementById("modalSave");
 
-    // 5) Variable globale pour savoir si on est en mode édition
-    //    - null => mode “ajout”
-    //    - string (ID) => mode “modifier <ID>”
-    let editingId = null;
+    let products = []; // Contiendra la liste des produits lus depuis Firestore
+    let editingDocId = null; // Si on est en modification, champ document.id ; sinon null
 
-    // 6) Charger tous les produits depuis Firestore et afficher le tableau
-    async function loadAllProducts() {
-      productTbody.innerHTML = ""; // Vider l’ancien contenu
-      try {
-        const produitsCol = collection(db, "produits");
-        const snapshot    = await getDocs(produitsCol);
-
-        if (snapshot.empty) {
-          console.warn("Aucun produit trouvé dans Firestore");
-        }
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          addProductRow({
-            id: docSnap.id,
-            name: data.name || "",
-            category: data.category || "",
-            seuilOrange: data.seuilOrange || 0,
-            seuilRouge: data.seuilRouge || 0
-          });
-        });
-      } catch (err) {
-        console.error("Erreur lors du chargement Firestore : ", err);
-      }
-    }
-
-    // 7) Ajouter une ligne au tableau pour un produit donné
-    function addProductRow(product) {
+    // 4) FONCTION D’AFFICHAGE D’UNE LIGNE PRODUIT DANS LE TABLEAU
+    function addProductRow(productData) {
+      // productData = { id, name, category, seuilOrange, seuilRouge, stock }
       const tr = document.createElement("tr");
-      tr.dataset.id = product.id;
+      tr.dataset.id = productData.id;
+
       tr.innerHTML = `
-        <td>${product.id}</td>
-        <td>${product.name}</td>
-        <td>${product.category}</td>
-        <td>${product.seuilOrange}</td>
-        <td>${product.seuilRouge}</td>
+        <td>${productData.id}</td>
+        <td>${productData.name}</td>
+        <td>${productData.category}</td>
+        <td>${productData.seuilOrange}</td>
+        <td>${productData.seuilRouge}</td>
         <td class="actions">
           <span class="material-icons" title="Modifier">edit</span>
           <span class="material-icons" title="Supprimer">delete</span>
         </td>
       `;
 
-      // 7.1) Écouteur sur l’icône ✏️ (modifier)
-      tr.querySelector("td.actions .material-icons[title='Modifier']").addEventListener("click", async () => {
-        editingId = product.id;
-        modalTitle.textContent = "Modifier le produit";
-        inputId.value = product.id;
-        inputId.disabled = true;   // On empêche de changer l’ID
-        inputName.value = product.name;
-        inputCategory.value = product.category;
-        inputSeuilOrange.value = product.seuilOrange;
-        inputSeuilRouge.value = product.seuilRouge;
+      // 4a) Quand on clique sur “Modifier”
+      const editBtn = tr.querySelector("td.actions .material-icons[title='Modifier']");
+      editBtn.addEventListener("click", () => {
+        editingDocId = productData.id;
+        // Pré-remplit le formulaire
+        inputId.value        = productData.id;
+        inputName.value      = productData.name;
+        inputCategory.value  = productData.category;
+        inputSeuilOrange.value = productData.seuilOrange;
+        inputSeuilRouge.value  = productData.seuilRouge;
+        // On désactive l’input ID pour éviter de le modifier
+        inputId.disabled = true;
+        // Ouvre le modal
         modalOverlay.style.display = "flex";
         inputName.focus();
       });
 
-      // 7.2) Écouteur sur l’icône 🗑️ (supprimer)
-      tr.querySelector("td.actions .material-icons[title='Supprimer']").addEventListener("click", async () => {
-        const confirmed = confirm("Voulez-vous vraiment supprimer ce produit ?");
-        if (!confirmed) return;
-        try {
-          await deleteDoc(doc(db, "produits", product.id));
-          tr.remove();
-          if (editingId === product.id) {
-            closeModal();
+      // 4b) Quand on clique sur “Supprimer”
+      const deleteBtn = tr.querySelector("td.actions .material-icons[title='Supprimer']");
+      deleteBtn.addEventListener("click", async () => {
+        if (confirm(`Supprimer le produit “${productData.name}” ?`)) {
+          try {
+            await deleteDoc(doc(db, "produits", productData.id));
+            loadAllProducts(); // on recharge la liste
+          } catch (err) {
+            console.error("Erreur lors de la suppression :", err);
           }
-        } catch (err) {
-          console.error("Erreur lors de la suppression : ", err);
-          alert("Impossible de supprimer le produit.");
         }
       });
 
       productTbody.appendChild(tr);
     }
 
-    // 8) Ouverture / Fermeture du modal
+    // 5) CHARGER TOUS LES PRODUITS DEPUIS FIRESTORE (tri par “__name__” pour l’ordre de création)
+    async function loadAllProducts() {
+      productTbody.innerHTML = ""; // on vide l'<tbody>'
+
+      // On crée une requête triée par __name__ (ID) en ordre ascendant
+      const q = query(produitsCol, orderBy("__name__", "asc"));
+      try {
+        const querySnapshot = await getDocs(q);
+        products = []; // réinitialisation du tableau local
+        querySnapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const id   = docSnap.id;
+          const prod = {
+            id:          id,
+            name:        data.name || "",
+            category:    data.category || "",
+            seuilOrange: data.seuilOrange || 0,
+            seuilRouge:  data.seuilRouge || 0,
+            stock:       data.stock || 0
+          };
+          products.push(prod);
+        });
+        // On affiche chaque produit dans l’ordre (plus ancien → premier)
+        products.forEach(p => addProductRow(p));
+      } catch (err) {
+        console.error("Erreur lors du chargement des produits :", err);
+      }
+    }
+
+    // 6) OUVERTURE / FERMETURE DU MODAL
     function openModal() {
-      editingId = null;
-      modalTitle.textContent = "Ajouter un produit";
+      // Remise à zéro du formulaire
       inputId.value = "";
-      inputId.disabled = false;
       inputName.value = "";
       inputCategory.value = "";
       inputSeuilOrange.value = "";
       inputSeuilRouge.value = "";
+      inputId.disabled = false;
+      editingDocId = null;
       modalOverlay.style.display = "flex";
       inputId.focus();
     }
-
     function closeModal() {
       modalOverlay.style.display = "none";
-      editingId = null;
+      editingDocId = null;
+      inputId.disabled = false;
     }
-
-    modalCancel.addEventListener("click", closeModal);
-    modalOverlay.addEventListener("click", (e) => {
-      if (e.target === modalOverlay) {
-        closeModal();
-      }
+    modalCancel.addEventListener("click", () => closeModal());
+    modalOverlay.addEventListener("click", e => {
+      if (e.target === modalOverlay) closeModal();
     });
 
-    // 9) Enregistrer (mode Ajout ou Édition)
+    // 7) CRÉER OU METTRE À JOUR UN PRODUIT AU CLIC “Enregistrer”
     modalSave.addEventListener("click", async () => {
       const id          = inputId.value.trim();
       const name        = inputName.value.trim();
@@ -638,65 +632,47 @@
       const seuilOrange = parseInt(inputSeuilOrange.value, 10);
       const seuilRouge  = parseInt(inputSeuilRouge.value, 10);
 
-      // Vérifications basiques :
-      if (!id || !name || !category ||
-          isNaN(seuilOrange) || isNaN(seuilRouge)) {
-        alert("Veuillez remplir tous les champs correctement.");
+      // 7a) Validation rapide
+      if (!id || !name || !category || isNaN(seuilOrange) || isNaN(seuilRouge)) {
+        alert("Merci de remplir tous les champs correctement.");
         return;
       }
 
       try {
-        if (editingId) {
-          // ---- Mode Édition ----
-          await setDoc(doc(db, "produits", editingId), {
-            name: name,
-            category: category,
+        if (editingDocId) {
+          // On met à jour le document existant
+          const docRef = doc(db, "produits", editingDocId);
+          await updateDoc(docRef, {
+            name:        name,
+            category:    category,
             seuilOrange: seuilOrange,
-            seuilRouge: seuilRouge,
-            stock: 0
-          }, { merge: true });
-          // Mettre à jour la ligne du tableau dans le DOM
-          const existingRow = productTbody.querySelector(`tr[data-id="${editingId}"]`);
-          if (existingRow) {
-            existingRow.children[1].textContent = name;
-            existingRow.children[2].textContent = category;
-            existingRow.children[3].textContent = seuilOrange;
-            existingRow.children[4].textContent = seuilRouge;
-          }
-          closeModal();
-          return;
+            seuilRouge:  seuilRouge
+          });
+        } else {
+          // On crée un nouveau document avec l’ID saisi
+          // On initialise stock à 0 par défaut
+          await addDoc(produitsCol, {
+            name:        name,
+            category:    category,
+            seuilOrange: seuilOrange,
+            seuilRouge:  seuilRouge,
+            stock:       0
+          });
         }
 
-        // ---- Mode Ajout ----
-        // Vérifier qu’aucun doc n’existe déjà sous cet ID
-        const docRef  = doc(db, "produits", id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          alert("Un produit avec cet ID existe déjà. Choisissez un autre ID.");
-          return;
-        }
-        await setDoc(docRef, {
-          name: name,
-          category: category,
-          seuilOrange: seuilOrange,
-          seuilRouge: seuilRouge,
-          stock: 0
-        });
-        addProductRow({ id, name, category, seuilOrange, seuilRouge });
+        // On rafraîchit la liste et on ferme le modal
+        await loadAllProducts();
         closeModal();
       } catch (err) {
-        console.error("Erreur lors de la création/modification du produit : ", err);
-        alert("Impossible d’enregistrer le produit (vérifiez vos permissions).");
+        console.error("Erreur lors de l’enregistrement du produit :", err);
+        alert("Une erreur est survenue. Vérifiez la console.");
       }
     });
 
-    // 10) Exposer openModal / closeModal dans window pour que 
-    //     <button onclick="openModal()">…</button> fonctionne
-    window.openModal  = openModal;
-    window.closeModal = closeModal;
-
-    // 11) Charger les produits au chargement de la page
-    window.addEventListener("DOMContentLoaded", loadAllProducts);
+    // 8) CHARGER L’ÉCRAN AU DÉMARRAGE
+    window.addEventListener("DOMContentLoaded", () => {
+      loadAllProducts();
+    });
   </script>
 </body>
 </html>
