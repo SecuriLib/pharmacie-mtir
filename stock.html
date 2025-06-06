@@ -223,6 +223,7 @@
       font-size: 14px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      white-space: nowrap; /* Empêche le retour à la ligne */
     }
     .stock-table tr:nth-child(even) {
       background-color: #fafafa;
@@ -230,10 +231,12 @@
     .stock-table tr:hover {
       background-color: var(--table-row-hover);
     }
-    /* Largeur fixe pour les colonnes numériques ou l'icône */
+    /* Colonnes numériques / icône */
     .stock-table td.stock,
     .stock-table td.current {
       width: 120px;
+      white-space: nowrap;
+      text-align: center;
     }
     .stock-table td.edit {
       text-align: center;
@@ -249,7 +252,7 @@
     }
 
     /* ================================
-       LIGNE “CATEGORIE”
+       LIGNE “CATEGORIE” (AU-DESSUS)
        ================================ */
     .category-row td {
       background-color: var(--category-bg);
@@ -319,6 +322,7 @@
     .modal .btn-save:hover {
       background: #3a8ee6;
     }
+
   </style>
 </head>
 <body>
@@ -400,15 +404,14 @@
     <table class="stock-table">
       <thead>
         <tr>
-          <th>ID</th>
           <th>Nom du produit</th>
           <th>Quantité en stock</th>
           <th>Quantité actuelle</th>
-          <th></th> <!-- Colonne pour l’icône de modification -->
+          <th></th> <!-- Icône Modifier -->
         </tr>
       </thead>
       <tbody id="stockTbody">
-        <!-- Les lignes seront remplies dynamiquement -->
+        <!-- Lignes remplies dynamiquement -->
       </tbody>
     </table>
   </div>
@@ -464,23 +467,27 @@
     let products = JSON.parse(localStorage.getItem("products") || "[]");
 
     function addStockRow(product) {
-      // Clé de persistance pour la quantité totale
-      const stockKey = "stock_" + product.id;
-      // Clé de persistance pour la quantité actuelle
+      // Clés pour persister les quantités
+      const stockKey   = "stock_" + product.id;
       const currentKey = "current_" + product.id;
 
-      // Lire les valeurs stockées (ou 0 si aucune)
-      const savedStock = parseInt(localStorage.getItem(stockKey), 10);
+      const savedStock   = parseInt(localStorage.getItem(stockKey), 10);
       const savedCurrent = parseInt(localStorage.getItem(currentKey), 10);
 
-      const qtyStock = isNaN(savedStock) ? 0 : savedStock;
+      const qtyStock   = isNaN(savedStock)   ? 0 : savedStock;
       const qtyCurrent = isNaN(savedCurrent) ? qtyStock : savedCurrent;
 
-      // Creer la première ligne (ID / Nom / Quantité / Quantité actuelle / Edit)
+      // 1) Créer la ligne “Catégorie” au-dessus
+      const trCat = document.createElement("tr");
+      trCat.classList.add("category-row");
+      trCat.innerHTML = `
+        <td colspan="4">Catégorie : ${product.category}</td>
+      `;
+
+      // 2) Créer la ligne principale (Nom / Q en stock / Q actuelle / Edit)
       const trMain = document.createElement("tr");
       trMain.dataset.id = product.id;
       trMain.innerHTML = `
-        <td>${product.id}</td>
         <td>${product.name}</td>
         <td class="stock">${qtyStock}</td>
         <td class="current">${qtyCurrent}</td>
@@ -488,7 +495,7 @@
           <span class="material-icons" title="Modifier">edit</span>
         </td>
       `;
-      // Écouteur pour le bouton d’édition de la première ligne
+      // Écouteur pour ouvrir le modal depuis le bouton “edit”
       trMain.querySelector("td.edit .material-icons").addEventListener("click", () => {
         activeRow = trMain;
         modalInput.value = trMain.querySelector("td.stock").textContent.trim();
@@ -496,19 +503,12 @@
         modalInput.focus();
       });
 
-      // Créer la deuxième ligne (Catégorie)
-      const trCat = document.createElement("tr");
-      trCat.classList.add("category-row");
-      trCat.innerHTML = `
-        <td colspan="5">Catégorie : ${product.category}</td>
-      `;
-
-      // Ajouter successivement trMain puis trCat au <tbody>
-      stockTbody.appendChild(trMain);
+      // Ajouter successivement la ligne catégorie puis la ligne principale dans le <tbody>
       stockTbody.appendChild(trCat);
+      stockTbody.appendChild(trMain);
     }
 
-    // Afficher tous les produits au chargement
+    // Au chargement, afficher tous les produits
     products.forEach(p => addStockRow(p));
 
     // --- Gérer le modal de modification ---
@@ -529,10 +529,10 @@
         return;
       }
       const id = activeRow.dataset.id;
-      // Mettre à jour dans la ligne principale
+      // Mise à jour de la ligne principale dans le tableau
       activeRow.querySelector("td.stock").textContent = newQty;
       activeRow.querySelector("td.current").textContent = newQty;
-      // Sauvegarder dans localStorage
+      // Sauvegarde persistante
       localStorage.setItem("stock_" + id, newQty);
       localStorage.setItem("current_" + id, newQty);
       closeModal();
