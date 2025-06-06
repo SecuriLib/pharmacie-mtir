@@ -243,19 +243,24 @@
     .product-table tr:hover {
       background-color: var(--table-row-hover);
     }
-    .product-table td.actions {
-      text-align: center;
-      width: 80px;  /* Assez pour deux icônes */
-    }
-    .product-table td.actions .material-icons {
-      cursor: pointer;
-      color: var(--icon-color);
-      margin: 0 4px;
-      transition: color 0.2s;
-    }
-    .product-table td.actions .material-icons:hover {
-      color: var(--accent-color);
-    }
+.product-table td.actions {
+  display: flex;               /* Affiche en ligne les enfants */
+  justify-content: center;     /* Centre horizontalement */
+  align-items: center;         /* Centre verticalement */
+  gap: 8px;                    /* Espace entre les icônes */
+  white-space: nowrap;         /* Empêche le passage à la ligne */
+  padding: 0 8px;              /* Un peu de marge intérieure horizontale */
+}
+
+.product-table td.actions .material-icons {
+  cursor: pointer;
+  color: var(--icon-color);
+  transition: color 0.2s;
+}
+.product-table td.actions .material-icons:hover {
+  color: var(--accent-color);
+}
+
 
     /* ================================
        MODAL (Ajout / Modification)
