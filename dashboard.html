@@ -241,12 +241,12 @@
     .stat-info {
       flex-grow: 1;
     }
-    /* Ajout d’un ID sur le <h2> pour pouvoir le mettre à jour dynamiquement */
+    /* On ajoute un ID sur le <h2> pour pouvoir le mettre à jour en JavaScript */
     .stat-info h2 {
       font-size: 22px;
       margin-bottom: 4px;
       color: #2c3e50;
-      white-space: nowrap;  /* Empêche le retour à la ligne intempestif */
+      white-space: nowrap;  /* Empêche les retours à la ligne intempestifs */
     }
     .stat-info p {
       font-size: 14px;
@@ -420,13 +420,13 @@
           <span class="material-icons">inventory</span>
         </div>
         <div class="stat-info">
-          <!-- L'ID "totalArticles" sera mis à jour en JS -->
+          <!-- L’ID “totalArticles” sera mis à jour depuis Firestore -->
           <h2 id="totalArticles">0</h2>
           <p>Total articles en stock</p>
         </div>
       </div>
 
-      <!-- Carte “Articles bas stock” (pour l’instant statique) -->
+      <!-- Carte “Articles bas stock” (statique pour l’instant) -->
       <div class="stat-card">
         <div class="stat-icon">
           <span class="material-icons">warning_amber</span>
@@ -516,13 +516,38 @@
 
   <!-- ==============================================
        SCRIPT JAVASCRIPT
-       (masquage admin-only + mise à jour du total)
-       ==============================================
-       Ce script s’exécute au chargement de la page, il
-       lit la clé "products" dans localStorage, en compte
-       la longueur, puis met à jour #totalArticles. -->
-  <script>
-    // Fonction utilitaire pour extraire les paramètres GET
+       (masquage admin-only + lecture Firestore pour total)
+       ============================================== -->
+  <script type="module">
+    /***********************************************************
+     1) Importer les fonctions Firebase dont on a besoin
+    ***********************************************************/
+    import { initializeApp } 
+      from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs 
+    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+    /***********************************************************
+     2) Configuration et initialisation de Firebase
+    ***********************************************************/
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-jAqqfgoJIuJkEWojc5LCGsRnWu6J3lQ",
+      authDomain: "pharmacie-mtir-db.firebaseapp.com",
+      projectId: "pharmacie-mtir-db",
+      storageBucket: "pharmacie-mtir-db.appspot.com",
+      messagingSenderId: "840095043695",
+      appId: "1:840095043695:web:5841203196acfd400c7d9a",
+      measurementId: "G-TW0H23MKSJ"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    /***********************************************************
+     3) Masquage des sections “admin-only” si besoin
+    ***********************************************************/
     function getQueryParams() {
       const params = {};
       window.location.search
@@ -535,32 +560,44 @@
         });
       return params;
     }
-
-    // Récupère role=user/admin depuis l’URL (ex : dashboard.html?role=admin)
     const params = getQueryParams();
     const role   = params.role || "user";
-
-    // Si l’utilisateur n’est pas admin, on masque les sections .admin-only
     if (role !== "admin") {
       document.querySelectorAll(".nav-group.admin-only").forEach(el => {
         el.style.display = "none";
       });
-      // En plus, on change le message de bienvenue
+      // Ajuster le message de bienvenue
       document.querySelector(".dashboard-header .welcome-msg")
         .textContent = "Bonjour, Utilisateur !";
     }
 
-    // ===== Logiciel pour mettre à jour la carte “Total articles en stock” =====
-    // 1) On lit l’array “products” dans localStorage (initalisé par produit.html)
-    //    Si la clé n’existe pas, on aura un tableau vide []
-    const products = JSON.parse(localStorage.getItem("products") || "[]");
+    /***********************************************************
+     4) Fonction pour compter les documents Firestore dans 
+        la collection “produits” et mettre à jour #totalArticles
+    ***********************************************************/
+    async function updateTotalFromFirestore() {
+      try {
+        // 4.1) Récupérer la référence à la collection “produits”
+        const produitsCol = collection(db, "produits");
+        // 4.2) Récupérer tous les documents (getDocs)
+        const snapshot = await getDocs(produitsCol);
+        // 4.3) Le nombre total de documents
+        const totalCount = snapshot.size; // ou snapshot.docs.length
+        // 4.4) Mettre à jour la carte
+        document.getElementById("totalArticles").textContent = totalCount;
+      } catch (err) {
+        console.error("❌ Erreur lors de la lecture Firestore :", err);
+        // Si un problème (permissions, absence de collection, etc.), on reste à 0
+        document.getElementById("totalArticles").textContent = "0";
+      }
+    }
 
-    // 2) On calcule le nombre d’éléments dans cet array
-    //    (suppose que chaque élément correspond à un produit unique)
-    const totalCount = Array.isArray(products) ? products.length : 0;
-
-    // 3) On met à jour le <h2 id="totalArticles"> avec ce nombre
-    document.getElementById("totalArticles").textContent = totalCount;
+    /***********************************************************
+     5) Lancer la mise à jour au chargement de la page
+    ***********************************************************/
+    window.addEventListener("DOMContentLoaded", () => {
+      updateTotalFromFirestore();
+    });
   </script>
 </body>
 </html>
