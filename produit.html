@@ -356,7 +356,7 @@
             </a>
           </li>
           <li>
-            <a href="ajouter_produit.html?role=admin" class="active">
+            <a href="produit.html?role=admin" class="active">
               <span class="material-icons">add_box</span>
               <span class="link-text">Ajouter un produit</span>
             </a>
@@ -428,7 +428,7 @@
       <h2>Ajouter un produit</h2>
 
       <label for="inputId">ID :</label>
-      <input type="text" id="inputId" />
+      <input type="text" id="inputId" readonly />
 
       <label for="inputName">Nom du produit :</label>
       <input type="text" id="inputName" />
@@ -455,9 +455,38 @@
   </div>
 
   <!-- ==============================================
-       SCRIPT JAVASCRIPT (masquage admin-only + ajout/suppression persistant)
+       SCRIPT JAVASCRIPT (masquage admin-only + Firestore)
        ================================================ -->
-  <script>
+  <script type="module">
+    // 1) IMPORTER CE DONT ON A BESOIN DEPUIS FIREBASE v11 (modulaire)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      addDoc,
+      deleteDoc,
+      doc,
+      orderBy,
+      query
+    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+    // 2) VOTRE CONFIGURATION FIREBASE (à remplacer par la vôtre)
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-jAqqfgoJIuJkEWojc5LCGsRnWu6J3lQ",
+      authDomain: "pharmacie-mtir-db.firebaseapp.com",
+      projectId: "pharmacie-mtir-db",
+      storageBucket: "pharmacie-mtir-db.firebasestorage.app",
+      messagingSenderId: "840095043695",
+      appId: "1:840095043695:web:5841203196acfd400c7d9a",
+      measurementId: "G-TW0H23MKSJ"
+    };
+
+    // 3) INITIALISATION DE FIRESTORE
+    const app        = initializeApp(firebaseConfig);
+    const db         = getFirestore(app);
+    const produitsCol = collection(db, "produits");
+
     // --- Masquage des sections admin-only ---
     function getQueryParams() {
       const params = {};
@@ -472,31 +501,88 @@
       return params;
     }
     const params = getQueryParams();
-    const role = params.role || "user";
+    const role   = params.role || "user";
     if (role !== "admin") {
       document.querySelectorAll(".nav-group.admin-only").forEach(el => {
         el.style.display = "none";
       });
     }
 
-    // --- Références au tableau et modal ---
-    const productTbody = document.getElementById("productTbody");
-    const modalOverlay = document.getElementById("modalOverlay");
-    const inputId = document.getElementById("inputId");
-    const inputName = document.getElementById("inputName");
-    const inputCategory = document.getElementById("inputCategory");
+    // 4) RÉFÉRENCES AU DOM
+    const productTbody   = document.getElementById("productTbody");
+    const modalOverlay   = document.getElementById("modalOverlay");
+    const inputId        = document.getElementById("inputId");
+    const inputName      = document.getElementById("inputName");
+    const inputCategory  = document.getElementById("inputCategory");
     const inputSeuilOrange = document.getElementById("inputSeuilOrange");
-    const inputSeuilRouge = document.getElementById("inputSeuilRouge");
-    const modalCancel = document.getElementById("modalCancel");
-    const modalSave = document.getElementById("modalSave");
+    const inputSeuilRouge  = document.getElementById("inputSeuilRouge");
+    const modalCancel    = document.getElementById("modalCancel");
+    const modalSave      = document.getElementById("modalSave");
 
-    // --- Chargement initial depuis localStorage ---
-    let products = JSON.parse(localStorage.getItem("products") || "[]");
-
-    function saveAllProducts() {
-      localStorage.setItem("products", JSON.stringify(products));
+    // 5) GÉNÉRATEUR D’ID UNIQUE (pour Firestore, on pourrait aussi laisser Firestore générer un ID auto,
+    //    mais ici on montre comment choisir un ID custom)
+    function generateId() {
+      return "prod_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
     }
 
+    // 6) OUVRIR / FERMER LE MODAL
+    function openModal() {
+      inputId.value        = generateId();
+      inputName.value      = "";
+      inputCategory.value  = "";
+      inputSeuilOrange.value = "";
+      inputSeuilRouge.value  = "";
+      modalOverlay.style.display = "flex";
+      inputName.focus();
+    }
+    function closeModal() {
+      modalOverlay.style.display = "none";
+    }
+
+    modalCancel.addEventListener("click", () => {
+      closeModal();
+    });
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay) {
+        closeModal();
+      }
+    });
+
+    // 7) AJOUTER UN PRODUIT DANS FIRESTORE
+    modalSave.addEventListener("click", async () => {
+      const id          = inputId.value.trim();
+      const name        = inputName.value.trim();
+      const category    = inputCategory.value;
+      const seuilOrange = parseInt(inputSeuilOrange.value, 10);
+      const seuilRouge  = parseInt(inputSeuilRouge.value, 10);
+
+      // Vérifications basiques
+      if (!id || !name || !category || isNaN(seuilOrange) || isNaN(seuilRouge)) {
+        alert("Veuillez remplir tous les champs avec des valeurs valides.");
+        return;
+      }
+
+      // On crée l’objet produit (initial stock à 0)
+      const newProduct = {
+        name: name,
+        category: category,
+        seuilOrange: seuilOrange,
+        seuilRouge: seuilRouge,
+        stock: 0
+      };
+
+      try {
+        // Si vous voulez forcer l’ID exact que vous avez généré :
+        await addDoc(doc(db, "produits", id), newProduct);
+        // Sinon vous pouvez faire : await addDoc(produitsCol, newProduct) pour un ID auto-généré.
+        addProductRow({ id: id, ...newProduct });
+        closeModal();
+      } catch (err) {
+        console.error("Erreur lors de l’ajout du produit :", err);
+      }
+    });
+
+    // 8) SUPPRIMER UN PRODUIT DE FIRESTORE
     function addProductRow(product) {
       const tr = document.createElement("tr");
       tr.dataset.id = product.id;
@@ -512,86 +598,35 @@
         </td>
       `;
 
-      // Écouteur pour la poubelle
-      tr.querySelector("td.actions .material-icons").addEventListener("click", () => {
-        if (confirm("Supprimer ce produit ?")) {
-          // Retirer du tableau produits
-          products = products.filter(p => p.id !== product.id);
-          saveAllProducts();
-          // Retirer également de localStorage les clés liées au stock
-          localStorage.removeItem("stock_" + product.id);
-          localStorage.removeItem("current_" + product.id);
-          // Enlever la ligne du DOM
-          tr.remove();
+      // Clic sur la corbeille → suppression dans Firestore
+      tr.querySelector("td.actions .material-icons").addEventListener("click", async () => {
+        if (confirm("Supprimer ce produit définitivement ?")) {
+          try {
+            await deleteDoc(doc(db, "produits", product.id));
+            tr.remove();
+          } catch (err) {
+            console.error("Erreur lors de la suppression :", err);
+          }
         }
       });
 
       productTbody.appendChild(tr);
     }
 
-    // Afficher tous les produits au chargement
-    products.forEach(p => addProductRow(p));
-
-    // --- Fonctions du modal ---
-    function openModal() {
-      inputId.value = "";
-      inputName.value = "";
-      inputCategory.value = "";
-      inputSeuilOrange.value = "";
-      inputSeuilRouge.value = "";
-      modalOverlay.style.display = "flex";
-      inputId.focus();
+    // 9) CHARGER LES PRODUITS EXISTANTS AU DÉMARRAGE
+    async function loadAllProducts() {
+      productTbody.innerHTML = ""; // vider
+      // On récupère tous les documents Firestore, triés par nom
+      const q = query(produitsCol, orderBy("name", "asc"));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(docSnap => {
+        const productData = { id: docSnap.id, ...docSnap.data() };
+        addProductRow(productData);
+      });
     }
 
-    function closeModal() {
-      modalOverlay.style.display = "none";
-    }
-
-    // Lorsque l'utilisateur clique sur "Enregistrer"
-    modalSave.addEventListener("click", () => {
-      const id = inputId.value.trim();
-      const name = inputName.value.trim();
-      const category = inputCategory.value; // Doit être "Étage 1" / "Étage 2" / "Étage 3"
-      const seuilOrange = parseInt(inputSeuilOrange.value, 10);
-      const seuilRouge = parseInt(inputSeuilRouge.value, 10);
-
-      // Vérifications basiques
-      if (!id || !name || !category
-          || isNaN(seuilOrange) || isNaN(seuilRouge)) {
-        alert("Veuillez remplir tous les champs avec des valeurs valides.");
-        return;
-      }
-      // Éviter doublons d'ID
-      if (products.some(p => p.id === id)) {
-        alert("Un produit avec cet ID existe déjà.");
-        return;
-      }
-
-      const newProduct = {
-        id,
-        name,
-        category,
-        seuilOrange,
-        seuilRouge
-      };
-
-      products.push(newProduct);
-      saveAllProducts();
-      addProductRow(newProduct);
-
-      closeModal();
-    });
-
-    // Annuler le modal
-    modalCancel.addEventListener("click", () => {
-      closeModal();
-    });
-
-    // Fermer le modal en cliquant sur l'overlay
-    modalOverlay.addEventListener("click", (e) => {
-      if (e.target === modalOverlay) {
-        closeModal();
-      }
+    window.addEventListener("DOMContentLoaded", () => {
+      loadAllProducts();
     });
   </script>
 </body>

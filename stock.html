@@ -231,7 +231,7 @@
     .stock-table tr:hover {
       background-color: var(--table-row-hover);
     }
-    /* colonnes numériques / icône */
+    /* Colonnes numériques / icône */
     .stock-table td.stock,
     .stock-table td.current {
       width: 120px;
@@ -430,10 +430,38 @@
   </div>
 
   <!-- ==============================================
-       SCRIPT JAVASCRIPT (masquage admin-only + affichage groupé)
+       SCRIPT JAVASCRIPT (masquage admin-only + Firestore + groupement)
        ================================================ -->
-  <script>
-    // --- Masquage des sections admin-only ---
+  <script type="module">
+    // 1) IMPORTER CE DONT ON A BESOIN DEPUIS FIREBASE v11 (modulaire)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      updateDoc,
+      doc,
+      query,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+    // 2) VOTRE CONFIGURATION FIREBASE (à remplacer par la vôtre)
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-jAqqfgoJIuJkEWojc5LCGsRnWu6J3lQ",
+      authDomain: "pharmacie-mtir-db.firebaseapp.com",
+      projectId: "pharmacie-mtir-db",
+      storageBucket: "pharmacie-mtir-db.firebasestorage.app",
+      messagingSenderId: "840095043695",
+      appId: "1:840095043695:web:5841203196acfd400c7d9a",
+      measurementId: "G-TW0H23MKSJ"
+    };
+
+    // 3) INITIALISATION DE FIRESTORE
+    const app    = initializeApp(firebaseConfig);
+    const db     = getFirestore(app);
+    const produitsCol = collection(db, "produits");
+
+    // --- Masquage des sections admin-only (comme avant) ---
     function getQueryParams() {
       const params = {};
       window.location.search
@@ -447,82 +475,71 @@
       return params;
     }
     const params = getQueryParams();
-    const role = params.role || "user";
+    const role   = params.role || "user";
     if (role !== "admin") {
       document.querySelectorAll(".nav-group.admin-only").forEach(el => {
         el.style.display = "none";
       });
     }
 
-    // --- Références au tableau et modal ---
-    const stockTbody  = document.getElementById("stockTbody");
+    // 4) RÉFÉRENCES AU DOM
+    const stockTbody   = document.getElementById("stockTbody");
     const modalOverlay = document.getElementById("modalOverlay");
     const modalInput   = document.getElementById("modalInput");
     const modalCancel  = document.getElementById("modalCancel");
     const modalSave    = document.getElementById("modalSave");
     let activeRow = null;
 
-    // --- Charger la liste des produits depuis localStorage ---
-    let products = JSON.parse(localStorage.getItem("products") || "[]");
+    // 5) FONCTION DE CHARGEMENT DE TOUS LES PRODUITS DE FIRESTORE
+    async function loadAllStock() {
+      stockTbody.innerHTML = "";        // On vide d'abord le tableau
+      let lastCategory = null;
 
-    // Pour regrouper, on trie d'abord par catégorie (ordre alphabétique)
-    products.sort((a, b) => {
-      if (a.category < b.category) return -1;
-      if (a.category > b.category) return 1;
-      return 0;
-    });
+      // Création d’une requête Firestore triée par catégorie puis par nom
+      const q = query(produitsCol, orderBy("category", "asc"), orderBy("name", "asc"));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(docSnap => {
+        const product = { id: docSnap.id, ...docSnap.data() };
+        addStockRow(product, lastCategory);
+        lastCategory = product.category;
+      });
+    }
 
-    let lastCategory = null; // pour ne pas répéter à chaque fois
-
-    function addStockRow(product) {
-      // Clés pour la persistance
-      const stockKey   = "stock_" + product.id;
-      const currentKey = "current_" + product.id;
-
-      const savedStock   = parseInt(localStorage.getItem(stockKey), 10);
-      const savedCurrent = parseInt(localStorage.getItem(currentKey), 10);
-
-      const qtyStock   = isNaN(savedStock)   ? 0 : savedStock;
-      const qtyCurrent = isNaN(savedCurrent) ? qtyStock : savedCurrent;
-
-      // Si la catégorie a changé par rapport à lastCategory, on ajoute une ligne “Catégorie”
-      if (product.category !== lastCategory) {
+    // 6) AJOUT D’UNE LIGNE DE PRODUIT (et, si nécessaire, d’une ligne “Catégorie”)
+    function addStockRow(product, lastCatParam) {
+      // Si la catégorie change (ou si c’est la première ligne), afficher “Catégorie : X”
+      if (product.category !== lastCatParam) {
         const trCat = document.createElement("tr");
         trCat.classList.add("category-row");
-        trCat.innerHTML = `
-          <td colspan="4">Catégorie : ${product.category}</td>
-        `;
+        trCat.innerHTML = `<td colspan="4">Catégorie : ${product.category}</td>`;
         stockTbody.appendChild(trCat);
-        lastCategory = product.category;
       }
 
-      // Créer la ligne principale (Nom du produit / Q en stock / Q actuelle / icône)
-      const trMain = document.createElement("tr");
-      trMain.dataset.id = product.id;
-      trMain.innerHTML = `
+      // Maintenant la ligne du produit
+      const tr = document.createElement("tr");
+      tr.dataset.id = product.id;
+      tr.innerHTML = `
         <td>${product.name}</td>
-        <td class="stock">${qtyStock}</td>
-        <td class="current">${qtyCurrent}</td>
+        <td class="stock">${product.stock}</td>
+        <td class="current">${product.stock}</td>
         <td class="edit">
           <span class="material-icons" title="Modifier">edit</span>
         </td>
       `;
 
-      // Écouteur pour le bouton “Modifier”
-      trMain.querySelector("td.edit .material-icons").addEventListener("click", () => {
-        activeRow = trMain;
-        modalInput.value = trMain.querySelector("td.stock").textContent.trim();
+      // Clic sur l’icône “edit” → ouvrir le modal pour modifier la quantité
+      tr.querySelector("td.edit .material-icons").addEventListener("click", () => {
+        activeRow = tr;
+        // On pré-remplit l’input du modal avec la quantité actuelle
+        modalInput.value = tr.querySelector("td.stock").textContent.trim();
         modalOverlay.style.display = "flex";
         modalInput.focus();
       });
 
-      stockTbody.appendChild(trMain);
+      stockTbody.appendChild(tr);
     }
 
-    // Afficher tous les produits (groupés par catégorie)
-    products.forEach(p => addStockRow(p));
-
-    // --- Gérer le modal de modification ---
+    // 7) FONCTION POUR FERMER LE MODAL
     function closeModal() {
       modalOverlay.style.display = "none";
       activeRow = null;
@@ -532,7 +549,14 @@
       closeModal();
     });
 
-    modalSave.addEventListener("click", () => {
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay) {
+        closeModal();
+      }
+    });
+
+    // 8) SAUVEGARDER LA NOUVELLE QUANTITÉ DANS FIRESTORE
+    modalSave.addEventListener("click", async () => {
       if (!activeRow) return;
       const newQty = parseInt(modalInput.value, 10);
       if (isNaN(newQty) || newQty < 0) {
@@ -540,19 +564,23 @@
         return;
       }
       const id = activeRow.dataset.id;
-      // Mise à jour de la ligne principale
-      activeRow.querySelector("td.stock").textContent = newQty;
-      activeRow.querySelector("td.current").textContent = newQty;
-      // Sauvegarde dans localStorage
-      localStorage.setItem("stock_" + id, newQty);
-      localStorage.setItem("current_" + id, newQty);
-      closeModal();
+
+      try {
+        // Mise à jour du champ “stock” dans le document Firestore
+        await updateDoc(doc(db, "produits", id), { stock: newQty });
+
+        // Mise à jour du DOM
+        activeRow.querySelector("td.stock").textContent   = newQty;
+        activeRow.querySelector("td.current").textContent = newQty;
+        closeModal();
+      } catch (err) {
+        console.error("Erreur mise à jour stock :", err);
+      }
     });
 
-    modalOverlay.addEventListener("click", (e) => {
-      if (e.target === modalOverlay) {
-        closeModal();
-      }
+    // 9) CHARGER LES DONNÉES AU DÉMARRAGE
+    window.addEventListener("DOMContentLoaded", () => {
+      loadAllStock();
     });
   </script>
 </body>
