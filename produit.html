@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pharmacie MTIR – Ajouter un produit</title>
+
+  <!-- Roboto + Material Icons -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* ================================
+       RESET & VARIABLES
+       ================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      font-family: "Roboto", sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      overflow: hidden;
+    }
+    :root {
+      --sidebar-width: 240px;
+      --sidebar-bg: #ffffff;
+      --sidebar-border: #e0e0e0;
+      --text-color: #495057;
+      --heading-color: #6c757d;
+      --active-bg: #f3f4f6;
+      --active-border: #5c7cfa;
+      --icon-color: #6c757d;
+      --hover-bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --card-shadow: rgba(0, 0, 0, 0.05);
+      --accent-color: #4b9eff;
+      --table-header-bg: #f1f3f5;
+      --table-row-hover: #f9f9f9;
+      --modal-overlay: rgba(0, 0, 0, 0.4);
+      --modal-bg: #ffffff;
+      --modal-accent: #4b9eff;
+    }
+
+    /* ================================
+       SIDEBAR
+       ================================ */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--sidebar-bg);
+      border-right: 1px solid var(--sidebar-border);
+      display: flex;
+      flex-direction: column;
+      padding-top: 24px;
+      height: 100vh;
+      overflow-y: auto;
+      position: fixed;
+      top: 0;
+      left: 0;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .sidebar::-webkit-scrollbar {
+      display: none;
+    }
+    .sidebar .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+      padding: 0 16px;
+    }
+    .sidebar .brand .material-icons {
+      font-size: 32px;
+      color: var(--active-border);
+      margin-right: 8px;
+    }
+    .sidebar .brand .brand-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-color);
+      white-space: nowrap;
+    }
+    .sidebar nav {
+      flex-grow: 1;
+      padding-left: 0;
+      list-style: none;
+    }
+    .sidebar nav .nav-group {
+      margin-bottom: 24px;
+    }
+    .sidebar nav .nav-group > .group-title {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--heading-color);
+      text-transform: uppercase;
+      padding: 0 24px;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    .sidebar nav .nav-group ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .sidebar nav .nav-group li {
+      margin-bottom: 4px;
+      position: relative;
+    }
+    .sidebar nav .nav-group li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 24px;
+      text-decoration: none;
+      color: var(--text-color);
+      font-size: 14px;
+      border-right: 4px solid transparent;
+      transition: background-color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+    .sidebar nav .nav-group li a .material-icons {
+      font-size: 20px;
+      color: var(--icon-color);
+      flex-shrink: 0;
+    }
+    .sidebar nav .nav-group li a:hover {
+      background-color: var(--hover-bg);
+    }
+    .sidebar nav .nav-group li a.active {
+      background-color: var(--active-bg);
+      border-right-color: var(--active-border);
+      color: var(--text-color);
+    }
+    .sidebar nav .nav-group li a.active .material-icons {
+      color: var(--active-border);
+    }
+
+    /* ================================
+       BOUTON DÉCONNEXION
+       ================================ */
+    .logout {
+      margin-top: auto;
+      padding: 16px;
+      text-align: center;
+      border-top: 1px solid var(--sidebar-border);
+    }
+    .logout a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text-color);
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    .logout a .material-icons {
+      font-size: 20px;
+      color: var(--icon-color);
+    }
+    .logout a:hover {
+      background-color: var(--hover-bg);
+    }
+
+    /* ================================
+       CONTENU PRINCIPAL
+       ================================ */
+    .content {
+      margin-left: var(--sidebar-width);
+      padding: 32px;
+      height: 100vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .page-header h1 {
+      font-size: 28px;
+      color: #34495e;
+    }
+    .page-header button {
+      background-color: var(--accent-color);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .page-header button:hover {
+      background-color: #3a8ee6;
+    }
+
+    /* ================================
+       TABLEAU PRODUITS
+       ================================ */
+    .product-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-shadow);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px var(--card-shadow);
+    }
+    .product-table th,
+    .product-table td {
+      padding: 12px 16px;
+      text-align: left;
+    }
+    .product-table th {
+      background-color: var(--table-header-bg);
+      color: var(--text-color);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .product-table tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+    .product-table tr:hover {
+      background-color: var(--table-row-hover);
+    }
+    .product-table td.actions {
+      text-align: center;
+      width: 48px;
+    }
+    .product-table td.actions .material-icons {
+      cursor: pointer;
+      color: var(--icon-color);
+      transition: color 0.2s;
+    }
+    .product-table td.actions .material-icons:hover {
+      color: var(--accent-color);
+    }
+
+    /* ================================
+       MODAL
+       ================================ */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--modal-overlay);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal {
+      background: var(--modal-bg);
+      border-radius: 8px;
+      width: 360px;
+      padding: 24px;
+      box-shadow: 0 6px 20px var(--card-shadow);
+      text-align: center;
+    }
+    .modal h2 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      color: #34495e;
+    }
+    .modal label {
+      display: block;
+      text-align: left;
+      font-size: 14px;
+      color: var(--heading-color);
+      margin-bottom: 4px;
+    }
+    .modal input[type="text"],
+    .modal input[type="number"],
+    .modal select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+    .modal button {
+      padding: 10px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 0 8px;
+      transition: background-color 0.2s;
+    }
+    .modal .btn-cancel {
+      background: #ccc;
+      color: #fff;
+    }
+    .modal .btn-cancel:hover {
+      background: #aaa;
+    }
+    .modal .btn-save {
+      background: var(--accent-color);
+      color: #fff;
+    }
+    .modal .btn-save:hover {
+      background: #3a8ee6;
+    }
+  </style>
+</head>
+<body>
+  <!-- ==============================================
+       SIDEBAR
+       ================================================ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="material-icons">local_pharmacy</span>
+      <span class="brand-text">Pharmacie MTIR</span>
+    </div>
+    <nav>
+      <div class="nav-group">
+        <ul>
+          <li>
+            <a href="dashboard.html?role=admin">
+              <span class="material-icons">dashboard</span>
+              <span class="link-text">Tableau de bord</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="nav-group admin-only">
+        <span class="group-title">Gestion du Stock</span>
+        <ul>
+          <li>
+            <a href="stock.html?role=admin">
+              <span class="material-icons">inventory</span>
+              <span class="link-text">Stock</span>
+            </a>
+          </li>
+          <li>
+            <a href="ajouter_produit.html?role=admin" class="active">
+              <span class="material-icons">add_box</span>
+              <span class="link-text">Ajouter un produit</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="nav-group admin-only">
+        <span class="group-title">Utilisateurs</span>
+        <ul>
+          <li>
+            <a href="#">
+              <span class="material-icons">group</span>
+              <span class="link-text">Liste Utilisateurs</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="nav-group admin-only">
+        <span class="group-title">Admin</span>
+        <ul>
+          <li>
+            <a href="#">
+              <span class="material-icons">receipt_long</span>
+              <span class="link-text">Logs</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="logout">
+      <a href="login.html">
+        <span class="material-icons">logout</span>
+        <span>Déconnexion</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ==============================================
+       CONTENU PRINCIPAL (Ajouter un produit)
+       ================================================ -->
+  <div class="content">
+    <div class="page-header">
+      <h1>Ajouter un produit</h1>
+      <button onclick="openModal()">Ajouter un produit</button>
+    </div>
+
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nom du produit</th>
+          <th>Catégorie</th>
+          <th>Seuil orange</th>
+          <th>Seuil rouge</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="productTbody">
+        <!-- Lignes générées dynamiquement -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ==============================================
+       MODAL D'AJOUT DE PRODUIT
+       ================================================ -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h2>Ajouter un produit</h2>
+
+      <label for="inputId">ID :</label>
+      <input type="text" id="inputId" />
+
+      <label for="inputName">Nom du produit :</label>
+      <input type="text" id="inputName" />
+
+      <label for="inputCategory">Catégorie :</label>
+      <select id="inputCategory">
+        <option value="" disabled selected>Choisissez un étage</option>
+        <option value="Étage 1">Étage 1</option>
+        <option value="Étage 2">Étage 2</option>
+        <option value="Étage 3">Étage 3</option>
+      </select>
+
+      <label for="inputSeuilOrange">Seuil orange :</label>
+      <input type="number" id="inputSeuilOrange" min="0" />
+
+      <label for="inputSeuilRouge">Seuil rouge :</label>
+      <input type="number" id="inputSeuilRouge" min="0" />
+
+      <div>
+        <button class="btn-cancel" id="modalCancel">Annuler</button>
+        <button class="btn-save" id="modalSave">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       SCRIPT JAVASCRIPT (masquage admin-only + ajout/suppression persistant)
+       ================================================ -->
+  <script>
+    // --- Masquage des sections admin-only ---
+    function getQueryParams() {
+      const params = {};
+      window.location.search
+        .substring(1)
+        .split("&")
+        .forEach(pair => {
+          if (!pair) return;
+          const [key, value] = pair.split("=");
+          params[decodeURIComponent(key)] = decodeURIComponent(value || "");
+        });
+      return params;
+    }
+    const params = getQueryParams();
+    const role = params.role || "user";
+    if (role !== "admin") {
+      document.querySelectorAll(".nav-group.admin-only").forEach(el => {
+        el.style.display = "none";
+      });
+    }
+
+    // --- Références au tableau et modal ---
+    const productTbody = document.getElementById("productTbody");
+    const modalOverlay = document.getElementById("modalOverlay");
+    const inputId = document.getElementById("inputId");
+    const inputName = document.getElementById("inputName");
+    const inputCategory = document.getElementById("inputCategory");
+    const inputSeuilOrange = document.getElementById("inputSeuilOrange");
+    const inputSeuilRouge = document.getElementById("inputSeuilRouge");
+    const modalCancel = document.getElementById("modalCancel");
+    const modalSave = document.getElementById("modalSave");
+
+    // --- Chargement initial depuis localStorage ---
+    let products = JSON.parse(localStorage.getItem("products") || "[]");
+
+    function saveAllProducts() {
+      localStorage.setItem("products", JSON.stringify(products));
+    }
+
+    function addProductRow(product) {
+      const tr = document.createElement("tr");
+      tr.dataset.id = product.id;
+
+      tr.innerHTML = `
+        <td>${product.id}</td>
+        <td>${product.name}</td>
+        <td>${product.category}</td>
+        <td>${product.seuilOrange}</td>
+        <td>${product.seuilRouge}</td>
+        <td class="actions">
+          <span class="material-icons" title="Supprimer">delete</span>
+        </td>
+      `;
+
+      // Écouteur pour la poubelle
+      tr.querySelector("td.actions .material-icons").addEventListener("click", () => {
+        if (confirm("Supprimer ce produit ?")) {
+          // Retirer du tableau produits
+          products = products.filter(p => p.id !== product.id);
+          saveAllProducts();
+          // Retirer également de localStorage les clés liées au stock
+          localStorage.removeItem("stock_" + product.id);
+          localStorage.removeItem("current_" + product.id);
+          // Enlever la ligne du DOM
+          tr.remove();
+        }
+      });
+
+      productTbody.appendChild(tr);
+    }
+
+    // Afficher tous les produits au chargement
+    products.forEach(p => addProductRow(p));
+
+    // --- Fonctions du modal ---
+    function openModal() {
+      inputId.value = "";
+      inputName.value = "";
+      inputCategory.value = "";
+      inputSeuilOrange.value = "";
+      inputSeuilRouge.value = "";
+      modalOverlay.style.display = "flex";
+      inputId.focus();
+    }
+
+    function closeModal() {
+      modalOverlay.style.display = "none";
+    }
+
+    // Lorsque l'utilisateur clique sur "Enregistrer"
+    modalSave.addEventListener("click", () => {
+      const id = inputId.value.trim();
+      const name = inputName.value.trim();
+      const category = inputCategory.value; // Doit être "Étage 1" / "Étage 2" / "Étage 3"
+      const seuilOrange = parseInt(inputSeuilOrange.value, 10);
+      const seuilRouge = parseInt(inputSeuilRouge.value, 10);
+
+      // Vérifications basiques
+      if (!id || !name || !category
+          || isNaN(seuilOrange) || isNaN(seuilRouge)) {
+        alert("Veuillez remplir tous les champs avec des valeurs valides.");
+        return;
+      }
+      // Éviter doublons d'ID
+      if (products.some(p => p.id === id)) {
+        alert("Un produit avec cet ID existe déjà.");
+        return;
+      }
+
+      const newProduct = {
+        id,
+        name,
+        category,
+        seuilOrange,
+        seuilRouge
+      };
+
+      products.push(newProduct);
+      saveAllProducts();
+      addProductRow(newProduct);
+
+      closeModal();
+    });
+
+    // Annuler le modal
+    modalCancel.addEventListener("click", () => {
+      closeModal();
+    });
+
+    // Fermer le modal en cliquant sur l'overlay
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay) {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>
