@@ -400,8 +400,8 @@
   <div class="content">
     <div class="page-header">
       <h1>Ajouter un produit</h1>
-      <!-- Ce bouton ouvre le modal via addEventListener en JavaScript -->
-      <button id="addBtn">Ajouter un produit</button>
+      <!-- On garde le bouton pour ouvrir le modal -->
+      <button onclick="openModal()">Ajouter un produit</button>
     </div>
 
     <table class="product-table">
@@ -428,11 +428,12 @@
     <div class="modal">
       <h2>Ajouter un produit</h2>
 
+      <!-- Champ ID : c'est ici que l'utilisateur renseigne la clé personnalisée -->
       <label for="inputId">ID :</label>
-      <input type="text" id="inputId" readonly />
+      <input type="text" id="inputId" placeholder="Ex : produit-001" />
 
       <label for="inputName">Nom du produit :</label>
-      <input type="text" id="inputName" />
+      <input type="text" id="inputName" placeholder="Ex : Bandages stériles" />
 
       <label for="inputCategory">Catégorie :</label>
       <select id="inputCategory">
@@ -443,10 +444,10 @@
       </select>
 
       <label for="inputSeuilOrange">Seuil orange :</label>
-      <input type="number" id="inputSeuilOrange" min="0" />
+      <input type="number" id="inputSeuilOrange" min="0" placeholder="Ex : 10" />
 
       <label for="inputSeuilRouge">Seuil rouge :</label>
-      <input type="number" id="inputSeuilRouge" min="0" />
+      <input type="number" id="inputSeuilRouge" min="0" placeholder="Ex : 5" />
 
       <div>
         <button class="btn-cancel" id="modalCancel">Annuler</button>
@@ -459,40 +460,37 @@
        SCRIPT JAVASCRIPT (masquage admin-only + Firestore)
        ================================================ -->
   <script type="module">
-    // ─────────────────────────────────────────────────────
-    // 1) IMPORT FIRESTORE (modulaire v11)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      getDocs,
-      setDoc,
-      deleteDoc,
-      doc,
-      orderBy,
-      query
+    /***********************************************************
+     1) Importer les fonctions Firebase nécessaires
+    ***********************************************************/
+    import { initializeApp } 
+      from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      setDoc, 
+      doc, 
+      getDocs 
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-    // ─────────────────────────────────────────────────────
-    // 2) CONFIGURATION FIREBASE (remplacez-la par la vôtre)
+    /***********************************************************
+     2) Configuration & initialisation de Firebase
+    ***********************************************************/
     const firebaseConfig = {
       apiKey: "AIzaSyB-jAqqfgoJIuJkEWojc5LCGsRnWu6J3lQ",
       authDomain: "pharmacie-mtir-db.firebaseapp.com",
       projectId: "pharmacie-mtir-db",
-      storageBucket: "pharmacie-mtir-db.firebasestorage.app",
+      storageBucket: "pharmacie-mtir-db.appspot.com",
       messagingSenderId: "840095043695",
       appId: "1:840095043695:web:5841203196acfd400c7d9a",
       measurementId: "G-TW0H23MKSJ"
     };
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
 
-    // ─────────────────────────────────────────────────────
-    // 3) INITIALISATION DE FIRESTORE
-    const app         = initializeApp(firebaseConfig);
-    const db          = getFirestore(app);
-    const produitsCol = collection(db, "produits");
-
-    // ─────────────────────────────────────────────────────
-    // 4) GESTION DU MASQUAGE DES ÉLÉMENTS “admin-only”
+    /***********************************************************
+     3) Masquage des sections admin-only
+    ***********************************************************/
     function getQueryParams() {
       const params = {};
       window.location.search
@@ -513,56 +511,54 @@
       });
     }
 
-    // ─────────────────────────────────────────────────────
-    // 5) RÉFÉRENCES DANS LE DOM
-    const productTbody     = document.getElementById("productTbody");
-    const addBtn           = document.getElementById("addBtn");
-    const modalOverlay     = document.getElementById("modalOverlay");
-    const inputId          = document.getElementById("inputId");
-    const inputName        = document.getElementById("inputName");
-    const inputCategory    = document.getElementById("inputCategory");
+    /***********************************************************
+     4) Références au DOM pour le tableau & le modal
+    ***********************************************************/
+    const productTbody   = document.getElementById("productTbody");
+    const modalOverlay   = document.getElementById("modalOverlay");
+    const inputId        = document.getElementById("inputId");
+    const inputName      = document.getElementById("inputName");
+    const inputCategory  = document.getElementById("inputCategory");
     const inputSeuilOrange = document.getElementById("inputSeuilOrange");
     const inputSeuilRouge  = document.getElementById("inputSeuilRouge");
-    const modalCancel      = document.getElementById("modalCancel");
-    const modalSave        = document.getElementById("modalSave");
+    const modalCancel    = document.getElementById("modalCancel");
+    const modalSave      = document.getElementById("modalSave");
 
-    // ─────────────────────────────────────────────────────
-    // 6) GÉNÈRE UNE CHAÎNE “ID” UNIQUE (timestamp + aléatoire)
-    function generateId() {
-      return "prod_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
-    }
+    /***********************************************************
+     5) Charger initialement tous les produits Firestore
+        et les afficher dans le tableau
+    ***********************************************************/
+    async function loadAllProducts() {
+      productTbody.innerHTML = "";  
+      try {
+        const produitsCol = collection(db, "produits");
+        const snapshot    = await getDocs(produitsCol);
 
-    // ─────────────────────────────────────────────────────
-    // 7) OUVRIR / FERMER LE MODAL
-    function openModal() {
-      // Génère un ID à chaque ouverture
-      inputId.value         = generateId();
-      inputName.value       = "";
-      inputCategory.value   = "";
-      inputSeuilOrange.value = "";
-      inputSeuilRouge.value  = "";
-      modalOverlay.style.display = "flex";
-      inputName.focus();
-    }
-    function closeModal() {
-      modalOverlay.style.display = "none";
-    }
-
-    modalCancel.addEventListener("click", () => {
-      closeModal();
-    });
-    modalOverlay.addEventListener("click", (e) => {
-      if (e.target === modalOverlay) {
-        closeModal();
+        if (snapshot.empty) {
+          console.warn("Aucun produit dans Firestore");
+        }
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          addProductRow({
+            id: docSnap.id,
+            name: data.name || "",
+            category: data.category || "",
+            seuilOrange: data.seuilOrange || 0,
+            seuilRouge: data.seuilRouge || 0
+          });
+        });
+      } catch (err) {
+        console.error("Erreur lors du chargement Firestore :", err);
       }
-    });
+    }
 
-    // ─────────────────────────────────────────────────────
-    // 8) FONCTION POUR AJOUTER UNE LIGNE DANS LE TABLEAU <tbody>
+    /***********************************************************
+     6) Fonction pour ajouter une ligne au <tbody> du tableau
+        (affichage du produit existant)
+    ***********************************************************/
     function addProductRow(product) {
       const tr = document.createElement("tr");
-      tr.dataset.id = product.id;
-
+      tr.dataset.id = product.id;  
       tr.innerHTML = `
         <td>${product.id}</td>
         <td>${product.name}</td>
@@ -574,46 +570,46 @@
         </td>
       `;
 
-      // Si l’utilisateur clique sur la corbeille → on supprime de Firestore
+      // 👉 Écouteur sur l’icône “delete” pour supprimer le doc Firestore
       tr.querySelector("td.actions .material-icons").addEventListener("click", async () => {
-        if (confirm("Supprimer ce produit définitivement ?")) {
-          try {
-            await deleteDoc(doc(db, "produits", product.id));
-            tr.remove();
-          } catch (err) {
-            console.error("Erreur lors de la suppression du produit :", err);
-          }
+        const confirmed = confirm("Supprimer ce produit ?");
+        if (!confirmed) return;
+        try {
+          await deleteDoc(doc(db, "produits", product.id));
+          tr.remove();
+        } catch (err) {
+          console.error("Erreur lors de la suppression :", err);
         }
       });
 
       productTbody.appendChild(tr);
     }
 
-    // ─────────────────────────────────────────────────────
-    // 9) CHARGE TOUS LES PRODUITS DE FIRESTORE AU DÉMARRAGE
-    async function loadAllProducts() {
-      productTbody.innerHTML = ""; 
-      // On veut trier par “name” (croissant)
-      const q = query(produitsCol, orderBy("name", "asc")); 
-      try {
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          addProductRow({
-            id: docSnap.id,
-            name: data.name,
-            category: data.category,
-            seuilOrange: data.seuilOrange,
-            seuilRouge: data.seuilRouge
-          });
-        });
-      } catch (err) {
-        console.error("Erreur lors du chargement des produits :", err);
-      }
+    /***********************************************************
+     7) Ouvrir / Fermer le modal
+    ***********************************************************/
+    function openModal() {
+      inputId.value         = "";
+      inputName.value       = "";
+      inputCategory.value   = "";
+      inputSeuilOrange.value = "";
+      inputSeuilRouge.value  = "";
+      modalOverlay.style.display = "flex";
+      inputId.focus();
     }
+    function closeModal() {
+      modalOverlay.style.display = "none";
+    }
+    modalCancel.addEventListener("click", closeModal);
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
 
-    // ─────────────────────────────────────────────────────
-    // 10) QUAND ON CLIQUE SUR “Enregistrer” DANS LE MODAL
+    /***********************************************************
+     8) Enregistrer le nouveau produit avec l’ID saisi
+        - On récupère inputId.value comme clé du document
+        - On utilise setDoc(doc(db, "produits", customId), { … })
+    ***********************************************************/
     modalSave.addEventListener("click", async () => {
       const id          = inputId.value.trim();
       const name        = inputName.value.trim();
@@ -621,41 +617,46 @@
       const seuilOrange = parseInt(inputSeuilOrange.value, 10);
       const seuilRouge  = parseInt(inputSeuilRouge.value, 10);
 
-      // Validation basique :
-      if (!id || !name || !category || isNaN(seuilOrange) || isNaN(seuilRouge)) {
-        alert("Veuillez remplir tous les champs avant d’enregistrer !");
+      // --- Vérifications basiques ---
+      if (!id || !name || !category ||
+          isNaN(seuilOrange) || isNaN(seuilRouge)) {
+        alert("Veuillez remplir tous les champs correctement.");
         return;
       }
 
-      // Création de l’objet produit (on ne laisse aucun champ “undefined”)
-      const newProduct = {
-        name: name,
-        category: category,
-        seuilOrange: seuilOrange,
-        seuilRouge: seuilRouge,
-        stock: 0    // on initialise le stock à 0 par défaut
-      };
-
       try {
-        // On utilise setDoc au lieu de addDoc, afin d’imposer l’ID généré
+        // 1) On construit l’objet à stocker
+        const newProduct = {
+          name: name,
+          category: category,
+          seuilOrange: seuilOrange,
+          seuilRouge: seuilRouge,
+          stock: 0    // ou une valeur initiale si besoin
+        };
+        // 2) On crée (ou écrase) le document dont l’ID = id
         await setDoc(doc(db, "produits", id), newProduct);
 
-        // On ajoute immédiatement au tableau localement (UX instantanée)
-        addProductRow({ id, ...newProduct });
+        // 3) Ajout immédiat dans le tableau (UI)
+        addProductRow({ 
+          id, 
+          name, 
+          category, 
+          seuilOrange, 
+          seuilRouge 
+        });
+
         closeModal();
       } catch (err) {
-        console.error("Erreur lors de l’enregistrement du produit :", err);
+        console.error("Erreur lors de setDoc :", err);
+        alert("Impossible d’ajouter ce produit. Vérifiez l’ID ou vos permissions.");
       }
     });
 
-    // ─────────────────────────────────────────────────────
-    // 11) LIAISON DU BOUTON “Ajouter un produit”
-    addBtn.addEventListener("click", openModal);
-
-    // 12) AU CHARGEMENT DE LA PAGE, ON REMPLIT LE TABLEAU
-    window.addEventListener("DOMContentLoaded", () => {
-      loadAllProducts();
-    });
+    /***********************************************************
+     9) Au chargement de la page, on va récupérer
+        et afficher les produits déjà présents
+    ***********************************************************/
+    window.addEventListener("DOMContentLoaded", loadAllProducts);
   </script>
 </body>
 </html>
