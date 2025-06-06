@@ -400,7 +400,8 @@
   <div class="content">
     <div class="page-header">
       <h1>Ajouter un produit</h1>
-      <button onclick="openModal()">Ajouter un produit</button>
+      <!-- NOTE : on a retiré l’attribut onclick, on utilisera l’id "addBtn" en JS -->
+      <button id="addBtn">Ajouter un produit</button>
     </div>
 
     <table class="product-table">
@@ -509,27 +510,27 @@
     }
 
     // 4) RÉFÉRENCES AU DOM
-    const productTbody   = document.getElementById("productTbody");
-    const modalOverlay   = document.getElementById("modalOverlay");
-    const inputId        = document.getElementById("inputId");
-    const inputName      = document.getElementById("inputName");
-    const inputCategory  = document.getElementById("inputCategory");
+    const productTbody     = document.getElementById("productTbody");
+    const addBtn           = document.getElementById("addBtn");
+    const modalOverlay     = document.getElementById("modalOverlay");
+    const inputId          = document.getElementById("inputId");
+    const inputName        = document.getElementById("inputName");
+    const inputCategory    = document.getElementById("inputCategory");
     const inputSeuilOrange = document.getElementById("inputSeuilOrange");
     const inputSeuilRouge  = document.getElementById("inputSeuilRouge");
-    const modalCancel    = document.getElementById("modalCancel");
-    const modalSave      = document.getElementById("modalSave");
+    const modalCancel      = document.getElementById("modalCancel");
+    const modalSave        = document.getElementById("modalSave");
 
-    // 5) GÉNÉRATEUR D’ID UNIQUE (pour Firestore, on pourrait aussi laisser Firestore générer un ID auto,
-    //    mais ici on montre comment choisir un ID custom)
+    // 5) GÉNÉRATEUR D’ID UNIQUE (pour Firestore, on pourrait aussi laisser Firestore générer un ID auto)
     function generateId() {
       return "prod_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
     }
 
     // 6) OUVRIR / FERMER LE MODAL
     function openModal() {
-      inputId.value        = generateId();
-      inputName.value      = "";
-      inputCategory.value  = "";
+      inputId.value         = generateId();
+      inputName.value       = "";
+      inputCategory.value   = "";
       inputSeuilOrange.value = "";
       inputSeuilRouge.value  = "";
       modalOverlay.style.display = "flex";
@@ -572,9 +573,10 @@
       };
 
       try {
-        // Si vous voulez forcer l’ID exact que vous avez généré :
+        // On précise l’ID dans Firestore
         await addDoc(doc(db, "produits", id), newProduct);
-        // Sinon vous pouvez faire : await addDoc(produitsCol, newProduct) pour un ID auto-généré.
+
+        // Affichage immédiat dans le tableau
         addProductRow({ id: id, ...newProduct });
         closeModal();
       } catch (err) {
@@ -615,8 +617,8 @@
 
     // 9) CHARGER LES PRODUITS EXISTANTS AU DÉMARRAGE
     async function loadAllProducts() {
-      productTbody.innerHTML = ""; // vider
-      // On récupère tous les documents Firestore, triés par nom
+      productTbody.innerHTML = ""; // vider le tableau
+      // Récupérer tous les docs Firestore triés par nom
       const q = query(produitsCol, orderBy("name", "asc"));
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach(docSnap => {
@@ -624,6 +626,9 @@
         addProductRow(productData);
       });
     }
+
+    // 10) LIAISON DU BOUTON “Ajouter un produit” AVEC openModal()
+    addBtn.addEventListener("click", openModal);
 
     window.addEventListener("DOMContentLoaded", () => {
       loadAllProducts();
