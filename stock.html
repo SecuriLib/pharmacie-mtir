@@ -48,6 +48,7 @@
       --table-row-hover: #f9f9f9;
       --modal-overlay: rgba(0, 0, 0, 0.4);
       --modal-bg: #ffffff;
+      --category-bg: #eef3f7;
     }
 
     /* ================================
@@ -229,9 +230,8 @@
     .stock-table tr:hover {
       background-color: var(--table-row-hover);
     }
-    .stock-table td.stock {
-      width: 120px;
-    }
+    /* Largeur fixe pour les colonnes numériques ou l'icône */
+    .stock-table td.stock,
     .stock-table td.current {
       width: 120px;
     }
@@ -246,6 +246,18 @@
     }
     .stock-table td.edit .material-icons:hover {
       color: var(--active-border);
+    }
+
+    /* ================================
+       LIGNE “CATEGORIE”
+       ================================ */
+    .category-row td {
+      background-color: var(--category-bg);
+      font-style: italic;
+      color: var(--heading-color);
+      padding: 8px 16px;
+      border-top: 1px solid var(--table-row-hover);
+      border-bottom: 1px solid var(--table-row-hover);
     }
 
     /* ================================
@@ -390,7 +402,6 @@
         <tr>
           <th>ID</th>
           <th>Nom du produit</th>
-          <th>Catégorie</th>
           <th>Quantité en stock</th>
           <th>Quantité actuelle</th>
           <th></th> <!-- Colonne pour l’icône de modification -->
@@ -465,29 +476,36 @@
       const qtyStock = isNaN(savedStock) ? 0 : savedStock;
       const qtyCurrent = isNaN(savedCurrent) ? qtyStock : savedCurrent;
 
-      const tr = document.createElement("tr");
-      tr.dataset.id = product.id;
-
-      tr.innerHTML = `
+      // Creer la première ligne (ID / Nom / Quantité / Quantité actuelle / Edit)
+      const trMain = document.createElement("tr");
+      trMain.dataset.id = product.id;
+      trMain.innerHTML = `
         <td>${product.id}</td>
         <td>${product.name}</td>
-        <td>${product.category}</td>
         <td class="stock">${qtyStock}</td>
         <td class="current">${qtyCurrent}</td>
         <td class="edit">
           <span class="material-icons" title="Modifier">edit</span>
         </td>
       `;
-
-      // Écouteur pour le bouton d’édition
-      tr.querySelector("td.edit .material-icons").addEventListener("click", () => {
-        activeRow = tr;
-        modalInput.value = tr.querySelector("td.stock").textContent.trim();
+      // Écouteur pour le bouton d’édition de la première ligne
+      trMain.querySelector("td.edit .material-icons").addEventListener("click", () => {
+        activeRow = trMain;
+        modalInput.value = trMain.querySelector("td.stock").textContent.trim();
         modalOverlay.style.display = "flex";
         modalInput.focus();
       });
 
-      stockTbody.appendChild(tr);
+      // Créer la deuxième ligne (Catégorie)
+      const trCat = document.createElement("tr");
+      trCat.classList.add("category-row");
+      trCat.innerHTML = `
+        <td colspan="5">Catégorie : ${product.category}</td>
+      `;
+
+      // Ajouter successivement trMain puis trCat au <tbody>
+      stockTbody.appendChild(trMain);
+      stockTbody.appendChild(trCat);
     }
 
     // Afficher tous les produits au chargement
@@ -511,7 +529,7 @@
         return;
       }
       const id = activeRow.dataset.id;
-      // Mettre à jour dans le tableau
+      // Mettre à jour dans la ligne principale
       activeRow.querySelector("td.stock").textContent = newQty;
       activeRow.querySelector("td.current").textContent = newQty;
       // Sauvegarder dans localStorage
