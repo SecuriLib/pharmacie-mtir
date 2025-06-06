@@ -223,7 +223,7 @@
       font-size: 14px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      white-space: nowrap; /* Empêche le retour à la ligne */
+      white-space: nowrap; /* Empêche les retours à la ligne */
     }
     .stock-table tr:nth-child(even) {
       background-color: #fafafa;
@@ -231,7 +231,7 @@
     .stock-table tr:hover {
       background-color: var(--table-row-hover);
     }
-    /* Colonnes numériques / icône */
+    /* colonnes numériques / icône */
     .stock-table td.stock,
     .stock-table td.current {
       width: 120px;
@@ -264,7 +264,7 @@
     }
 
     /* ================================
-       MODAL
+       MODAL DE MODIFICATION
        ================================ */
     .modal-overlay {
       position: fixed;
@@ -322,7 +322,6 @@
     .modal .btn-save:hover {
       background: #3a8ee6;
     }
-
   </style>
 </head>
 <body>
@@ -411,7 +410,7 @@
         </tr>
       </thead>
       <tbody id="stockTbody">
-        <!-- Lignes remplies dynamiquement -->
+        <!-- Les lignes seront remplies dynamiquement -->
       </tbody>
     </table>
   </div>
@@ -431,7 +430,7 @@
   </div>
 
   <!-- ==============================================
-       SCRIPT JAVASCRIPT (masquage admin-only + affichage/persistant)
+       SCRIPT JAVASCRIPT (masquage admin-only + affichage groupé)
        ================================================ -->
   <script>
     // --- Masquage des sections admin-only ---
@@ -456,18 +455,27 @@
     }
 
     // --- Références au tableau et modal ---
-    const stockTbody = document.getElementById("stockTbody");
+    const stockTbody  = document.getElementById("stockTbody");
     const modalOverlay = document.getElementById("modalOverlay");
-    const modalInput = document.getElementById("modalInput");
-    const modalCancel = document.getElementById("modalCancel");
-    const modalSave = document.getElementById("modalSave");
+    const modalInput   = document.getElementById("modalInput");
+    const modalCancel  = document.getElementById("modalCancel");
+    const modalSave    = document.getElementById("modalSave");
     let activeRow = null;
 
     // --- Charger la liste des produits depuis localStorage ---
     let products = JSON.parse(localStorage.getItem("products") || "[]");
 
+    // Pour regrouper, on trie d'abord par catégorie (ordre alphabétique)
+    products.sort((a, b) => {
+      if (a.category < b.category) return -1;
+      if (a.category > b.category) return 1;
+      return 0;
+    });
+
+    let lastCategory = null; // pour ne pas répéter à chaque fois
+
     function addStockRow(product) {
-      // Clés pour persister les quantités
+      // Clés pour la persistance
       const stockKey   = "stock_" + product.id;
       const currentKey = "current_" + product.id;
 
@@ -477,14 +485,18 @@
       const qtyStock   = isNaN(savedStock)   ? 0 : savedStock;
       const qtyCurrent = isNaN(savedCurrent) ? qtyStock : savedCurrent;
 
-      // 1) Créer la ligne “Catégorie” au-dessus
-      const trCat = document.createElement("tr");
-      trCat.classList.add("category-row");
-      trCat.innerHTML = `
-        <td colspan="4">Catégorie : ${product.category}</td>
-      `;
+      // Si la catégorie a changé par rapport à lastCategory, on ajoute une ligne “Catégorie”
+      if (product.category !== lastCategory) {
+        const trCat = document.createElement("tr");
+        trCat.classList.add("category-row");
+        trCat.innerHTML = `
+          <td colspan="4">Catégorie : ${product.category}</td>
+        `;
+        stockTbody.appendChild(trCat);
+        lastCategory = product.category;
+      }
 
-      // 2) Créer la ligne principale (Nom / Q en stock / Q actuelle / Edit)
+      // Créer la ligne principale (Nom du produit / Q en stock / Q actuelle / icône)
       const trMain = document.createElement("tr");
       trMain.dataset.id = product.id;
       trMain.innerHTML = `
@@ -495,7 +507,8 @@
           <span class="material-icons" title="Modifier">edit</span>
         </td>
       `;
-      // Écouteur pour ouvrir le modal depuis le bouton “edit”
+
+      // Écouteur pour le bouton “Modifier”
       trMain.querySelector("td.edit .material-icons").addEventListener("click", () => {
         activeRow = trMain;
         modalInput.value = trMain.querySelector("td.stock").textContent.trim();
@@ -503,12 +516,10 @@
         modalInput.focus();
       });
 
-      // Ajouter successivement la ligne catégorie puis la ligne principale dans le <tbody>
-      stockTbody.appendChild(trCat);
       stockTbody.appendChild(trMain);
     }
 
-    // Au chargement, afficher tous les produits
+    // Afficher tous les produits (groupés par catégorie)
     products.forEach(p => addStockRow(p));
 
     // --- Gérer le modal de modification ---
@@ -529,10 +540,10 @@
         return;
       }
       const id = activeRow.dataset.id;
-      // Mise à jour de la ligne principale dans le tableau
+      // Mise à jour de la ligne principale
       activeRow.querySelector("td.stock").textContent = newQty;
       activeRow.querySelector("td.current").textContent = newQty;
-      // Sauvegarde persistante
+      // Sauvegarde dans localStorage
       localStorage.setItem("stock_" + id, newQty);
       localStorage.setItem("current_" + id, newQty);
       closeModal();
