@@ -438,10 +438,10 @@
        SCRIPT JAVASCRIPT (MODULE FIRESTORE)
        ================================================
        Cette section gère :
-       1. Masquage du contenu “admin-only” si le rôle ≠ admin
-       2. Lecture des produits depuis Firestore (classés par catégorie / nom)
+       1. Masquage du contenu “admin-only” si rôle ≠ admin
+       2. Lecture des produits depuis Firestore (ordonnés par ID, donc par date de création)
        3. Affichage groupé par catégorie
-       4. Mise à jour du champ “stock” (Firestore) et actualisation immédiate dans le tableau
+       4. Mise à jour du champ “stock” dans Firestore
   -->
   <script type="module">
     // 1) IMPORT FIRESTORE (ES Modules v11)
@@ -473,7 +473,7 @@
     // Référence à la collection “produits”
     const produitsCol = collection(db, "produits");
 
-    // 4) MASQUAGE “admin-only” SI role ≠ admin
+    // 4) MASQUAGE “admin-only” SI rôle ≠ admin
     function getQueryParams() {
       const params = {};
       window.location.search
@@ -541,14 +541,15 @@
 
     // 8) CHARGER LES PRODUITS DEPUIS FIRESTORE
     async function loadAllProducts() {
-      // Vider le tbody avant d’y insérer les nouvelles lignes
+      // Vider le <tbody> avant d’y insérer les nouvelles lignes
       stockTbody.innerHTML = "";
 
-      // On souhaite trier par “category” puis par “name” (tous deux ascendant)
+      // On trie par "__name__" (ID du document). 
+      // Les IDs sont du format "prod_<timestamp>_…", donc orderBy("__name__", "asc")
+      // revient à trier dans l’ordre chronologique d’ajout (plus ancien → premier).
       const q = query(
         produitsCol,
-        orderBy("category", "asc"),
-        orderBy("name", "asc")
+        orderBy("__name__", "asc")
       );
 
       try {
@@ -574,7 +575,7 @@
             lastCategory = prod.category;
           }
 
-          // Enfin, on ajoute la ligne produit
+          // Ajouter la ligne produit
           addProductRow(prod);
         });
       } catch (err) {
@@ -582,7 +583,7 @@
       }
     }
 
-    // 9) FONCTION POUR FERMER LE MODAL
+    // 9) FERMETURE DU MODAL
     function closeModal() {
       modalOverlay.style.display = "none";
       activeRow = null;
@@ -590,7 +591,7 @@
     modalCancel.addEventListener("click", () => {
       closeModal();
     });
-    // Cliquer en dehors de la boîte du modal la referme aussi
+    // Cliquer en dehors de la boîte du modal la referme
     modalOverlay.addEventListener("click", (e) => {
       if (e.target === modalOverlay) {
         closeModal();
@@ -613,7 +614,7 @@
         const docRef = doc(db, "produits", id);
         await updateDoc(docRef, { stock: newQty });
 
-        // Mettre à jour immédiatement la ligne active dans le tableau
+        // Mettre à jour immédiatement la ligne active
         activeRow.querySelector("td.stock").textContent   = newQty;
         activeRow.querySelector("td.current").textContent = newQty;
         closeModal();
