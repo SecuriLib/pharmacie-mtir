@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page de Connexion (Local avec Rôles)</title>
+  <!-- Google Font pour un rendu professionnel -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* --- Reset basique et styles globaux --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html,
+    body {
+      height: 100%;
+      font-family: "Roboto", sans-serif;
+      background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+      color: #333;
+    }
+
+    /* --- Conteneur principal --- */
+    .container {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* --- Carte blanche contenant le formulaire --- */
+    .login-card {
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      width: 360px;
+      max-width: 90%;
+      padding: 40px;
+      text-align: center;
+      position: relative;
+    }
+
+    /* --- En-tête du formulaire --- */
+    .login-card h2 {
+      margin-bottom: 20px;
+      font-weight: 500;
+      color: #182848;
+      font-size: 24px;
+    }
+
+    /* --- Style des champs de saisie --- */
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .form-group input:focus {
+      border-color: #4b6cb7;
+      outline: none;
+      box-shadow: 0 0 5px rgba(75, 108, 183, 0.4);
+    }
+
+    /* --- Bouton de connexion --- */
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background-color: #4b6cb7;
+      color: #ffffff;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s, transform 0.1s;
+    }
+    .btn-submit:hover {
+      background-color: #3a54a0;
+    }
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    /* --- Lien secondaire (mot de passe oublié) --- */
+    .help-links {
+      margin-top: 16px;
+      font-size: 14px;
+      text-align: right;
+    }
+    .help-links a {
+      color: #4b6cb7;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .help-links a:hover {
+      color: #3a54a0;
+    }
+
+    /* --- Message d’erreur --- */
+    #error-msg {
+      display: none;
+      color: #c0392b;
+      font-size: 14px;
+      margin-top: 10px;
+      text-align: left;
+    }
+
+    /* --- Responsive (petits écrans) --- */
+    @media (max-width: 400px) {
+      .login-card {
+        padding: 30px 20px;
+      }
+      .login-card h2 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="login-card">
+      <h2>Connexion</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Nom d’utilisateur</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Entrez votre nom d’utilisateur"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Entrez votre mot de passe"
+            required
+          />
+        </div>
+        <button type="submit" class="btn-submit">Se connecter</button>
+        <div id="error-msg">Nom d’utilisateur ou mot de passe incorrect.</div>
+        <div class="help-links">
+          <a href="#">Mot de passe oublié ?</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // --- Définissez ici vos utilisateurs autorisés en local (= username: { password, role }) ---
+    const users = {
+      "admin": { password: "admin", role: "admin" },
+      "user1": { password: "user1", role: "user" }
+      // Ajoutez ou modifiez les comptes selon vos besoins
+    };
+
+    // Sélection du formulaire et du message d’erreur
+    const form = document.getElementById("login-form");
+    const errorMsg = document.getElementById("error-msg");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault(); // Empêche la soumission classique
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+
+      // Vérification locale : existe-t-il un utilisateur avec ce nom ?
+      if (users[username] && users[username].password === password) {
+        const role = users[username].role;
+
+        // Redirection vers le dashboard en passant le rôle et le nom d’utilisateur
+        // Exemple : dashboard.html?user=admin&role=admin
+        window.location.href = `dashboard.html?user=${encodeURIComponent(username)}&role=${encodeURIComponent(role)}`;
+      } else {
+        // Échec : afficher le message d’erreur
+        errorMsg.style.display = "block";
+      }
+    });
+
+    // Masquer le message d’erreur dès que l’utilisateur modifie l’un des champs
+    document.getElementById("username").addEventListener("input", () => {
+      errorMsg.style.display = "none";
+    });
+    document.getElementById("password").addEventListener("input", () => {
+      errorMsg.style.display = "none";
+    });
+  </script>
+</body>
+</html>

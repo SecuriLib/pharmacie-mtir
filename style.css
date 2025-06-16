@@ -1,0 +1,115 @@
+/* style.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body, html {
+  height: 100%;
+  background: linear-gradient(135deg, #1f1c2c, #928dab);
+  /* Un dégradé sombre / pastel pour l'arrière-plan */
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.9);
+  /* Légère transparence pour voir le dégradé en sous-couche */
+  padding: 2rem 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 320px;
+  text-align: center;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.login-card h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 1.75rem;
+  letter-spacing: 1px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.input-group label {
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.input-group input {
+  padding: 0.65rem 0.8rem;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 5px rgba(108, 99, 255, 0.4);
+}
+
+.btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #6c63ff, #9d84f1);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.btn:hover {
+  background: linear-gradient(135deg, #5a52d4, #7f6ad9);
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.signup-link {
+  margin-top: 1.2rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.signup-link a {
+  color: #6c63ff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.signup-link a:hover {
+  color: #5a52d4;
+}
+
+/* Animation d'apparition */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

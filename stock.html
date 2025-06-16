@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pharmacie MTIR – Gestion du Stock</title>
+
+  <!-- Roboto + Material Icons -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* ================================
+       RESET & VARIABLES
+       ================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      font-family: "Roboto", sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      overflow: hidden;
+    }
+    :root {
+      --sidebar-width: 240px;
+      --sidebar-bg: #ffffff;
+      --sidebar-border: #e0e0e0;
+      --text-color: #495057;
+      --heading-color: #6c757d;
+      --active-bg: #f3f4f6;
+      --active-border: #5c7cfa;
+      --icon-color: #6c757d;
+      --hover-bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --card-shadow: rgba(0, 0, 0, 0.05);
+      --accent-color: #4b9eff;
+      --table-header-bg: #f1f3f5;
+      --table-row-hover: #f9f9f9;
+      --modal-overlay: rgba(0, 0, 0, 0.4);
+      --modal-bg: #ffffff;
+      --category-bg: #eef3f7;
+
+      /* Styles pour la barre de recherche */
+      --search-bg: #f0f4f8;
+      --search-border: #d1d7de;
+      --search-placeholder: #8a8f97;
+    }
+
+    /* ================================
+       SIDEBAR
+       ================================ */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--sidebar-bg);
+      border-right: 1px solid var(--sidebar-border);
+      display: flex;
+      flex-direction: column;
+      padding-top: 24px;
+      height: 100vh;
+      overflow-y: auto;
+      position: fixed;
+      top: 0;
+      left: 0;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .sidebar::-webkit-scrollbar {
+      display: none;
+    }
+    .sidebar .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+      padding: 0 16px;
+    }
+    .sidebar .brand .material-icons {
+      font-size: 32px;
+      color: var(--active-border);
+      margin-right: 8px;
+    }
+    .sidebar .brand .brand-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-color);
+      white-space: nowrap;
+    }
+    .sidebar nav {
+      flex-grow: 1;
+      padding-left: 0;
+      list-style: none;
+    }
+    .sidebar nav .nav-group {
+      margin-bottom: 24px;
+    }
+    .sidebar nav .nav-group > .group-title {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--heading-color);
+      text-transform: uppercase;
+      padding: 0 24px;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    .sidebar nav .nav-group ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .sidebar nav .nav-group li {
+      margin-bottom: 4px;
+      position: relative;
+    }
+    .sidebar nav .nav-group li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 24px;
+      text-decoration: none;
+      color: var(--text-color);
+      font-size: 14px;
+      border-right: 4px solid transparent;
+      transition: background-color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+    .sidebar nav .nav-group li a .material-icons {
+      font-size: 20px;
+      color: var(--icon-color);
+      flex-shrink: 0;
+    }
+    .sidebar nav .nav-group li a:hover {
+      background-color: var(--hover-bg);
+    }
+    .sidebar nav .nav-group li a.active {
+      background-color: var(--active-bg);
+      border-right-color: var(--active-border);
+      color: var(--text-color);
+    }
+    .sidebar nav .nav-group li a.active .material-icons {
+      color: var(--active-border);
+    }
+
+    /* ================================
+       BOUTON DÉCONNEXION
+       ================================ */
+    .logout {
+      margin-top: auto;
+      padding: 16px;
+      text-align: center;
+      border-top: 1px solid var(--sidebar-border);
+    }
+    .logout a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text-color);
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    .logout a .material-icons {
+      font-size: 20px;
+      color: var(--icon-color);
+    }
+    .logout a:hover {
+      background-color: var(--hover-bg);
+    }
+
+    /* ================================
+       CONTENU PRINCIPAL
+       ================================ */
+    .content {
+      margin-left: var(--sidebar-width);
+      padding: 32px;
+      height: 100vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .page-header {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .page-header h1 {
+      font-size: 28px;
+      color: #34495e;
+      flex-shrink: 0;
+    }
+
+    /* ================================
+       BARRE DE RECHERCHE
+       ================================ */
+    #searchInput {
+      width: 280px;
+      max-width: 40%;
+      padding: 8px 36px 8px 12px;
+      font-size: 14px;
+      border: 1px solid var(--search-border);
+      border-radius: 20px;
+      background-color: var(--search-bg);
+      color: #333;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%238a8f97" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM 4.5 9.5 A 5 5 0 1 1 14.5 9.5 A 5 5 0 0 1 4.5 9.5Z"/></svg>');
+      background-repeat: no-repeat;
+      background-size: 20px 20px;
+      background-position: right 10px center;
+    }
+    #searchInput::placeholder {
+      color: var(--search-placeholder);
+    }
+    #searchInput:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 4px rgba(75, 158, 255, 0.4);
+    }
+
+    /* ================================
+       TABLEAU STOCK
+       ================================ */
+    .stock-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-shadow);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px var(--card-shadow);
+    }
+    .stock-table th,
+    .stock-table td {
+      padding: 12px 16px;
+      text-align: left;
+    }
+    .stock-table th {
+      background-color: var(--table-header-bg);
+      color: var(--text-color);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap; /* Empêche le retour à la ligne */
+    }
+    .stock-table tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+    .stock-table tr:hover {
+      background-color: var(--table-row-hover);
+    }
+    .stock-table td.stock,
+    .stock-table td.current {
+      width: 120px;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .stock-table td.edit {
+      text-align: center;
+      width: 48px;
+    }
+    .stock-table td.edit .material-icons {
+      cursor: pointer;
+      color: var(--icon-color);
+      transition: color 0.2s;
+    }
+    .stock-table td.edit .material-icons:hover {
+      color: var(--active-border);
+    }
+
+    /* ================================
+       LIGNE “CATÉGORIE” (GROUPEMENT)
+       ================================ */
+    .category-row td {
+      background-color: var(--category-bg);
+      font-style: italic;
+      color: var(--heading-color);
+      padding: 8px 16px;
+      border-top: 1px solid var(--table-row-hover);
+      border-bottom: 1px solid var(--table-row-hover);
+    }
+
+    /* ================================
+       MODAL DE MODIFICATION
+       ================================ */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--modal-overlay);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal {
+      background: var(--modal-bg);
+      border-radius: 8px;
+      width: 320px;
+      padding: 24px;
+      box-shadow: 0 6px 20px var(--card-shadow);
+      text-align: center;
+    }
+    .modal h2 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      color: #34495e;
+    }
+    .modal input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    .modal button {
+      padding: 10px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 0 8px;
+      transition: background-color 0.2s;
+    }
+    .modal .btn-cancel {
+      background: #ccc;
+      color: #fff;
+    }
+    .modal .btn-cancel:hover {
+      background: #aaa;
+    }
+    .modal .btn-save {
+      background: var(--accent-color);
+      color: #fff;
+    }
+    .modal .btn-save:hover {
+      background: #3a8ee6;
+    }
+  </style>
+</head>
+<body>
+  <!-- ==============================================
+       SIDEBAR
+       ================================================ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="material-icons">local_pharmacy</span>
+      <span class="brand-text">Pharmacie MTIR</span>
+    </div>
+    <nav>
+      <!-- Tableau de bord (toujours visible) -->
+      <div class="nav-group">
+        <ul>
+          <li>
+            <a href="dashboard.html?role=admin">
+              <span class="material-icons">dashboard</span>
+              <span class="link-text">Tableau de bord</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Gestion du Stock (admin-only) -->
+      <div class="nav-group admin-only">
+        <span class="group-title">Gestion du Stock</span>
+        <ul>
+          <li>
+            <a href="stock.html?role=admin" class="active">
+              <span class="material-icons">inventory</span>
+              <span class="link-text">Stock</span>
+            </a>
+          </li>
+          <li>
+            <a href="produit.html?role=admin">
+              <span class="material-icons">add_box</span>
+              <span class="link-text">Ajouter un produit</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Utilisateurs (admin-only) -->
+      <div class="nav-group admin-only">
+        <span class="group-title">Utilisateurs</span>
+        <ul>
+          <li>
+            <a href="#">
+              <span class="material-icons">group</span>
+              <span class="link-text">Liste Utilisateurs</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Admin → Logs (admin-only) -->
+      <div class="nav-group admin-only">
+        <span class="group-title">Admin</span>
+        <ul>
+          <li>
+            <a href="#">
+              <span class="material-icons">receipt_long</span>
+              <span class="link-text">Logs</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Déconnexion -->
+    <div class="logout">
+      <a href="login.html">
+        <span class="material-icons">logout</span>
+        <span>Déconnexion</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ==============================================
+       CONTENU PRINCIPAL (Gestion du Stock)
+       ================================================ -->
+  <div class="content">
+    <div class="page-header">
+      <h1>Gestion du Stock</h1>
+      <!-- Champ de recherche à droite, style plus arrondi + icône -->
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Rechercher un produit…"
+      />
+    </div>
+
+    <table class="stock-table">
+      <thead>
+        <tr>
+          <th>Nom du produit</th>
+          <th>Quantité en stock</th>
+          <th>Quantité actuelle</th>
+          <th></th> <!-- Colonne pour l’icône de modification -->
+        </tr>
+      </thead>
+      <tbody id="stockTbody">
+        <!-- Les lignes seront ajoutées dynamiquement par JavaScript -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ==============================================
+       MODAL DE MODIFICATION DE STOCK
+       ================================================ -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h2>Modifier la quantité</h2>
+      <input type="number" id="modalInput" min="0" />
+      <div>
+        <button class="btn-cancel" id="modalCancel">Annuler</button>
+        <button class="btn-save" id="modalSave">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       SCRIPT JAVASCRIPT (MODULE FIRESTORE + FILTRAGE)
+       ================================================
+       1. Masquage “admin-only”
+       2. Chargement et affichage (tri par ordre de création via __name__)
+       3. Groupement par catégorie
+       4. Mise à jour du champ “stock” dans Firestore
+       5. Filtrage en temps réel avec #searchInput
+  -->
+  <script type="module">
+    // 1) IMPORT FIREBASE (v11)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      updateDoc,
+      doc,
+      orderBy,
+      query
+    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+    // 2) VOTRE CONFIG FIREBASE
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-jAqqfgoJIuJkEWojc5LCGsRnWu6J3lQ",
+      authDomain: "pharmacie-mtir-db.firebaseapp.com",
+      projectId: "pharmacie-mtir-db",
+      storageBucket: "pharmacie-mtir-db.firebasestorage.app",
+      messagingSenderId: "840095043695",
+      appId: "1:840095043695:web:5841203196acfd400c7d9a",
+      measurementId: "G-TW0H23MKSJ"
+    };
+
+    // 3) INITIALISATION DE FIRESTORE
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+    const produitsCol = collection(db, "produits");
+
+    // 4) MASQUAGE “admin-only”
+    function getQueryParams() {
+      const params = {};
+      window.location.search
+        .substring(1)
+        .split("&")
+        .forEach(pair => {
+          if (!pair) return;
+          const [key, value] = pair.split("=");
+          params[decodeURIComponent(key)] = decodeURIComponent(value || "");
+        });
+      return params;
+    }
+    const params = getQueryParams();
+    const role   = params.role || "user";
+    if (role !== "admin") {
+      document.querySelectorAll(".nav-group.admin-only").forEach(el => {
+        el.style.display = "none";
+      });
+    }
+
+    // 5) RÉFÉRENCES AU DOM
+    const stockTbody   = document.getElementById("stockTbody");
+    const modalOverlay = document.getElementById("modalOverlay");
+    const modalInput   = document.getElementById("modalInput");
+    const modalCancel  = document.getElementById("modalCancel");
+    const modalSave    = document.getElementById("modalSave");
+    const searchInput  = document.getElementById("searchInput");
+    let activeRow = null; // <tr> en cours d’édition
+
+    // 6) AJOUTER LIGNE CATÉGORIE
+    function addCategoryRow(category) {
+      const trCat = document.createElement("tr");
+      trCat.classList.add("category-row");
+      trCat.innerHTML = `
+        <td colspan="4">Catégorie : ${category}</td>
+      `;
+      stockTbody.appendChild(trCat);
+    }
+
+    // 7) AJOUTER LIGNE PRODUIT
+    function addProductRow(productData) {
+      // productData = { id, name, category, stock }
+      const trMain = document.createElement("tr");
+      trMain.dataset.id = productData.id;
+
+      trMain.innerHTML = `
+        <td class="cell-name">${productData.name}</td>
+        <td class="stock">${productData.stock}</td>
+        <td class="current">${productData.stock}</td>
+        <td class="edit">
+          <span class="material-icons" title="Modifier">edit</span>
+        </td>
+      `;
+
+      // 7a) Clic sur “edit” → ouvre le modal
+      trMain.querySelector("td.edit .material-icons").addEventListener("click", () => {
+        activeRow = trMain;
+        modalInput.value = trMain.querySelector("td.stock").textContent.trim();
+        modalOverlay.style.display = "flex";
+        modalInput.focus();
+      });
+
+      stockTbody.appendChild(trMain);
+    }
+
+    // 8) CHARGER TOUS LES PRODUITS (tri par ID Firestore = ordre de création)
+    async function loadAllProducts() {
+      stockTbody.innerHTML = ""; // on vide le <tbody>
+
+      // Requête triée par __name__ (ID) en ordre ascendant
+      const q = query(produitsCol, orderBy("__name__", "asc"));
+      try {
+        const querySnapshot = await getDocs(q);
+        let lastCategory = null;
+
+        querySnapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const id = docSnap.id;
+          const stockValue = typeof data.stock === "number" ? data.stock : 0;
+          const prod = {
+            id:       id,
+            name:     data.name || "",
+            category: data.category || "",
+            stock:    stockValue
+          };
+
+          // Si nouvelle catégorie, on insère la ligne d’intitulé
+          if (prod.category !== lastCategory) {
+            addCategoryRow(prod.category);
+            lastCategory = prod.category;
+          }
+
+          // On place la ligne produit
+          addProductRow(prod);
+        });
+
+        // Une fois l’affichage effectué, on déclenche le filtrage
+        filterTable();
+      } catch (err) {
+        console.error("Erreur lors du chargement des produits :", err);
+      }
+    }
+
+    // 9) FILTRER LE TABLEAU EN TEMPS RÉEL
+    function filterTable() {
+      const filterValue = searchInput.value.trim().toLowerCase();
+      const allRows = Array.from(stockTbody.querySelectorAll("tr"));
+      let i = 0;
+
+      while (i < allRows.length) {
+        const row = allRows[i];
+        if (row.classList.contains("category-row")) {
+          // Ligne catégorie → on recherche toutes les lignes produit suivantes
+          const catRow = row;
+          let j = i + 1;
+          let anyChildVisible = false;
+
+          while (j < allRows.length && !allRows[j].classList.contains("category-row")) {
+            const prodRow = allRows[j];
+            const nameCell = prodRow.querySelector(".cell-name");
+            const nameText = nameCell ? nameCell.textContent.trim().toLowerCase() : "";
+
+            if (filterValue === "" || nameText.includes(filterValue)) {
+              prodRow.style.display = "";
+              anyChildVisible = true;
+            } else {
+              prodRow.style.display = "none";
+            }
+            j++;
+          }
+
+          // Si aucun enfant produit n’est visible, on cache la ligne catégorie
+          catRow.style.display = anyChildVisible ? "" : "none";
+          i = j;
+        } else {
+          // Ligne produit isolée (au cas où) → on la filtre aussi
+          const prodRow = row;
+          const nameCell = prodRow.querySelector(".cell-name");
+          const nameText = nameCell ? nameCell.textContent.trim().toLowerCase() : "";
+
+          if (filterValue === "" || nameText.includes(filterValue)) {
+            prodRow.style.display = "";
+          } else {
+            prodRow.style.display = "none";
+          }
+          i++;
+        }
+      }
+    }
+
+    searchInput.addEventListener("input", filterTable);
+
+    // 10) GESTION DU MODAL + MISE À JOUR DU STOCK
+    function closeModal() {
+      modalOverlay.style.display = "none";
+      activeRow = null;
+    }
+    modalCancel.addEventListener("click", () => closeModal());
+    modalOverlay.addEventListener("click", e => {
+      if (e.target === modalOverlay) closeModal();
+    });
+
+    modalSave.addEventListener("click", async () => {
+      if (!activeRow) return;
+      const newQty = parseInt(modalInput.value, 10);
+      if (isNaN(newQty) || newQty < 0) {
+        alert("Veuillez entrer un nombre entier ≥ 0.");
+        return;
+      }
+      const id = activeRow.dataset.id;
+      try {
+        const docRef = doc(db, "produits", id);
+        await updateDoc(docRef, { stock: newQty });
+        // Mise à jour visuelle
+        activeRow.querySelector("td.stock").textContent = newQty;
+        activeRow.querySelector("td.current").textContent = newQty;
+        closeModal();
+      } catch (err) {
+        console.error("Erreur lors de la mise à jour du stock :", err);
+      }
+    });
+
+    // 11) AU CHARGEMENT DE LA PAGE → on lance loadAllProducts()
+    window.addEventListener("DOMContentLoaded", () => {
+      loadAllProducts();
+    });
+  </script>
+</body>
+</html>
