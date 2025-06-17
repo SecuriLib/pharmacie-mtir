@@ -24,6 +24,7 @@
       --text-color:#495057;--heading-color:#6c757d;--active-bg:#f3f4f6;
       --active-border:#5c7cfa;--icon-color:#6c757d;--hover-bg:#f8f9fa;
       --card-bg:#fff;--card-shadow:rgba(0,0,0,0.05);--accent-color:#4b9eff;
+      --log-bg:#fafafa;--log-border:#e0e0e0;
     }
     /* SIDEBAR */
     .sidebar{width:var(--sidebar-width);background:var(--sidebar-bg);
@@ -57,10 +58,15 @@
     .page-header .welcome-msg{font-size:16px;color:#777}
 
     /* LOGS TABLE */
-    .logs-table{width:100%;border-collapse:collapse;background:var(--card-bg);box-shadow:0 4px 12px var(--card-shadow);border-radius:8px;overflow:hidden}
-    .logs-table th, .logs-table td{padding:16px;text-align:left;border-bottom:1px solid #e0e0e0}
-    .logs-table th{background:var(--active-bg);font-weight:500;color:var(--heading-color)}
-    .logs-table tr:last-child td{border-bottom:none}
+    .logs-table{width:100%;border-collapse:separate;border-spacing:0 8px;background:var(--log-bg)}
+    .logs-table th{padding:12px 16px;text-align:left;background:var(--active-bg);font-weight:500;color:var(--heading-color);border-radius:8px 8px 0 0}
+    .logs-table th:nth-child(1){border-radius:8px 0 0 0}
+    .logs-table th:nth-child(2){border-radius:0 8px 0 0}
+    .logs-table tbody tr{background:var(--card-bg);box-shadow:0 2px 4px var(--card-shadow);border-left:4px solid var(--accent-color);transition:background .2s}
+    .logs-table tbody tr:hover{background:#fff}
+    .logs-table td{padding:16px;vertical-align:top;border:none;color:#444;}
+    .log-msg{white-space:pre-wrap;line-height:1.4;}
+    .log-time{font-size:14px;color:#888;}
   </style>
 </head>
 <body>
@@ -69,21 +75,7 @@
       <span class="material-icons">local_pharmacy</span>
       <span class="brand-text">Pharmacie MTIR</span>
     </div>
-    <nav>
-      <div class="nav-group"><ul>
-        <li><a href="dashboard.html?role=admin"><span class="material-icons">dashboard</span><span>Tableau de bord</span></a></li>
-      </ul></div>
-      <div class="nav-group"><span class="group-title">Gestion du Stock</span><ul>
-        <li><a href="stock.html?role=admin"><span class="material-icons">inventory</span><span>Stock</span></a></li>
-        <li><a href="produit.html?role=admin"><span class="material-icons">add_box</span><span>Ajouter un produit</span></a></li>
-      </ul></div>
-      <div class="nav-group"><span class="group-title">Utilisateurs</span><ul>
-        <li><a href="users.html?role=admin"><span class="material-icons">group</span><span>Liste Utilisateurs</span></a></li>
-      </ul></div>
-      <div class="nav-group"><span class="group-title">Admin</span><ul>
-        <li><a href="logs.html?role=admin" class="active"><span class="material-icons">receipt_long</span><span>Logs</span></a></li>
-      </ul></div>
-    </nav>
+    <nav>...</nav>
     <div class="logout"><a href="login.html"><span class="material-icons">logout</span><span>Déconnexion</span></a></div>
   </aside>
 
@@ -110,12 +102,10 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-    // Config Firebase
     const firebaseConfig = { apiKey:"…", authDomain:"…", projectId:"pharmacie-mtir-db", storageBucket:"…", messagingSenderId:"…", appId:"…" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Écoute en temps réel de la collection 'logs'
     const logsRef = collection(db, 'logs');
     const logsQuery = query(logsRef, orderBy('timestamp', 'desc'));
     const tbody = document.getElementById('logsBody');
@@ -124,18 +114,16 @@
       tbody.innerHTML = '';
       snapshot.forEach(doc => {
         const data = doc.data();
-        const message = data.message || '';
-        const timestamp = data.timestamp;
+        const msg = data.message || '';
+        const time = data.timestamp?.toDate().toLocaleString() || '';
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${message}</td>
-          <td>${timestamp?.toDate().toLocaleString() || ''}</td>
+          <td><div class="log-msg">${msg}</div></td>
+          <td><div class="log-time">${time}</div></td>
         `;
         tbody.appendChild(tr);
       });
-    }, err => {
-      console.error('Erreur écoute logs :', err);
-    });
+    }, err => console.error('Erreur écoute logs :', err));
   </script>
 </body>
 </html>
