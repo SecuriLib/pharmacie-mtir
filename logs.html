@@ -1,87 +1,65 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pharmacie MTIR - Logs</title>
+
   <!-- Roboto & Material Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
   <style>
+    /* RESET & VARIABLES */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body, html { height: 100%; font-family: 'Roboto', sans-serif; background: #f5f5f5; color: #333; }
+    html, body { height: 100%; font-family: 'Roboto', sans-serif; background: #f5f5f5; color: #333; }
     :root {
-      --sidebar-width: 240px;
-      --sidebar-bg: #fff;
-      --sidebar-border: #e0e0e0;
-      --text-color: #495057;
-      --heading-color: #6c757d;
-      --active-bg: #f3f4f6;
-      --active-border: #5c7cfa;
-      --hover-bg: #eef2f7;
-      --table-header-bg: #f3f4f6;
-      --table-row-hover: #f9fbfc;
+      --sidebar-w: 240px; --clr-bg: #fff; --clr-border: #e0e0e0;
+      --clr-text: #495057; --clr-heading: #34495e; --clr-accent: #4b9eff;
+      --clr-hover: #f3f4f6; --clr-card: #fff; --shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
+    /* SIDEBAR */
     .sidebar {
-      width: var(--sidebar-width);
-      background: var(--sidebar-bg);
-      border-right: 1px solid var(--sidebar-border);
-      position: fixed; top: 0; left: 0; height: 100%;
-      display: flex; flex-direction: column; padding-top: 24px;
-      overflow-y: auto;
+      width: var(--sidebar-w); position: fixed; top: 0; left: 0; height: 100%;
+      background: var(--clr-bg); border-right: 1px solid var(--clr-border);
+      display: flex; flex-direction: column; padding: 24px 0; overflow-y: auto;
     }
-    .sidebar .brand {
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 32px;
+    .brand { display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
+    .brand .material-icons { font-size: 32px; color: var(--clr-accent); margin-right: 8px; }
+    .brand-text { font-size: 20px; font-weight: 700; color: var(--clr-text); }
+    nav { flex: 1; }
+    .group-title { font-size: 12px; color: var(--clr-text); text-transform: uppercase;
+      padding: 0 24px; margin-top: 16px; margin-bottom: 8px; letter-spacing: .5px;
     }
-    .sidebar .brand .material-icons { font-size: 32px; color: var(--active-border); margin-right: 8px; }
-    .sidebar .brand-text { font-size: 20px; font-weight: 700; color: var(--text-color); }
-    .sidebar nav { flex-grow: 1; }
-    .sidebar .group-title {
-      font-size: 12px; color: var(--heading-color);
-      text-transform: uppercase; padding: 0 24px; margin-top: 16px; margin-bottom: 8px;
-      letter-spacing: .5px;
+    nav a { display: flex; align-items: center; gap: 12px; padding: 10px 24px;
+      text-decoration: none; color: var(--clr-text); border-right: 4px solid transparent;
+      transition: background .2s;
     }
-    .sidebar ul { list-style: none; padding: 0; }
-    .sidebar li { margin-bottom: 4px; }
-    .sidebar a {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 24px; text-decoration: none; color: var(--text-color);
-      border-right: 4px solid transparent; transition: background .2s, border .2s;
+    nav a:hover { background: var(--clr-hover); }
+    nav a.active { background: var(--clr-hover); border-right-color: var(--clr-accent); }
+    nav a.active .material-icons { color: var(--clr-accent); }
+    .logout { margin-top: auto; text-align: center; padding: 16px 0; border-top: 1px solid var(--clr-border); }
+    .logout a { display: inline-flex; align-items: center; gap: 8px; color: var(--clr-text);
+      text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background .2s;
     }
-    .sidebar a:hover { background: var(--hover-bg); }
-    .sidebar a.active { background: var(--active-bg); border-right-color: var(--active-border); }
-    .sidebar a.active .material-icons { color: var(--active-border); }
-    .logout {
-      margin-top: auto; padding: 16px; border-top: 1px solid var(--sidebar-border);
-      text-align: center;
-    }
-    .logout a { display: flex; align-items: center; justify-content: center; gap: 8px;
-      color: var(--text-color); text-decoration: none; padding: 8px 16px;
-      border-radius: 4px; transition: background .2s;
-    }
-    .logout a:hover { background: var(--hover-bg); }
-    .content {
-      margin-left: var(--sidebar-width); padding: 32px; overflow-y: auto;
-      min-height: 100vh;
-    }
+    .logout a:hover { background: var(--clr-hover); }
+
+    /* CONTENT */
+    .content { margin-left: var(--sidebar-w); padding: 32px; min-height: 100vh; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .page-header h1 { font-size: 28px; color: #34495e; }
-    .page-header .welcome-msg { font-size: 16px; color: #777; }
-    table {
-      width: 100%; border-collapse: collapse; background: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      border-radius: 8px; overflow: hidden;
+    .page-header h1 { font-size: 28px; color: var(--clr-heading); }
+    .welcome-msg { font-size: 16px; color: #777; }
+
+    /* LOGS LIST */
+    .logs-list { list-style: none; }
+    .logs-list li {
+      background: var(--clr-card); margin-bottom: 16px; padding: 16px;
+      box-shadow: var(--shadow); border-left: 4px solid var(--clr-accent);
+      transition: transform .2s;
     }
-    thead { background: var(--table-header-bg); }
-    th, td {
-      padding: 16px; text-align: left;
-      font-size: 14px; color: #333;
-      border-bottom: 1px solid #e0e0e0;
-    }
-    th { font-weight: 500; }
-    tbody tr:hover { background: var(--table-row-hover); }
-    td:last-child, th:last-child { text-align: center; }
+    .logs-list li:hover { transform: translateY(-2px); }
+    .log-msg { font-size: 14px; line-height: 1.5; color: #444; margin-bottom: 8px; }
+    .log-time { font-size: 12px; color: #888; text-align: right; }
   </style>
 </head>
 <body>
@@ -91,73 +69,63 @@
       <span class="brand-text">Pharmacie MTIR</span>
     </div>
     <nav>
-      <div>
-        <ul>
-          <li><a href="dashboard.html?role=admin"><span class="material-icons">dashboard</span><span>Tableau de bord</span></a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="group-title">Gestion du Stock</div>
-        <ul>
-          <li><a href="stock.html?role=admin"><span class="material-icons">inventory</span><span>Stock</span></a></li>
-          <li><a href="produit.html?role=admin"><span class="material-icons">add_box</span><span>Ajouter un produit</span></a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="group-title">Utilisateurs</div>
-        <ul>
-          <li><a href="users.html?role=admin"><span class="material-icons">group</span><span>Liste Utilisateurs</span></a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="group-title">Admin</div>
-        <ul>
-          <li><a href="logs.html?role=admin" class="active"><span class="material-icons">receipt_long</span><span>Logs</span></a></li>
-        </ul>
-      </div>
+      <ul>
+        <li><a href="dashboard.html?role=admin"><span class="material-icons">dashboard</span>Tableau de bord</a></li>
+      </ul>
+      <div class="group-title">Gestion du Stock</div>
+      <ul>
+        <li><a href="stock.html?role=admin"><span class="material-icons">inventory</span>Stock</a></li>
+        <li><a href="produit.html?role=admin"><span class="material-icons">add_box</span>Ajouter un produit</a></li>
+      </ul>
+      <div class="group-title">Utilisateurs</div>
+      <ul>
+        <li><a href="users.html?role=admin"><span class="material-icons">group</span>Liste Utilisateurs</a></li>
+      </ul>
+      <div class="group-title">Admin</div>
+      <ul>
+        <li><a href="logs.html?role=admin" class="active"><span class="material-icons">receipt_long</span>Logs</a></li>
+      </ul>
     </nav>
     <div class="logout">
-      <a href="login.html"><span class="material-icons">logout</span><span>Déconnexion</span></a>
+      <a href="login.html"><span class="material-icons">logout</span>Déconnexion</a>
     </div>
   </aside>
+
   <div class="content">
     <div class="page-header">
       <h1>Logs des modifications</h1>
       <div class="welcome-msg">Bonjour, <strong>Admin</strong> !</div>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Message</th>
-          <th>Date &amp; Heure</th>
-        </tr>
-      </thead>
-      <tbody id="logsBody">
-        <!-- Chargement en temps réel -->
-      </tbody>
-    </table>
+
+    <ul class="logs-list" id="logsBody">
+      <!-- Les logs s'affichent ici -->
+    </ul>
   </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
-    const firebaseConfig = { apiKey:"…", authDomain:"…", projectId:"pharmacie-mtir-db", storageBucket:"…", messagingSenderId:"…", appId:"…" };
+
+    const firebaseConfig = { apiKey: "…", authDomain: "…", projectId: "pharmacie-mtir-db", storageBucket: "…", messagingSenderId: "…", appId: "…" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
     const logsRef = collection(db, 'logs');
     const logsQuery = query(logsRef, orderBy('timestamp', 'desc'));
-    const tbody = document.getElementById('logsBody');
+    const container = document.getElementById('logsBody');
+
     onSnapshot(logsQuery, snapshot => {
-      tbody.innerHTML = '';
+      container.innerHTML = '';
       snapshot.forEach(doc => {
-        const { message='', timestamp } = doc.data();
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${message}</td>
-          <td>${timestamp?.toDate().toLocaleString() || ''}</td>
+        const { message = '', timestamp } = doc.data();
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div class="log-msg">${message}</div>
+          <div class="log-time">${timestamp?.toDate().toLocaleString() || ''}</div>
         `;
-        tbody.appendChild(tr);
+        container.appendChild(li);
       });
-    }, err => console.error('Erreur écoute logs:', err));
+    }, err => console.error('Erreur écoute logs :', err));
   </script>
 </body>
 </html>
