@@ -24,23 +24,31 @@
       --text-color:#495057;--heading-color:#6c757d;--active-bg:#f3f4f6;
       --active-border:#5c7cfa;--icon-color:#6c757d;--hover-bg:#f8f9fa;
       --card-bg:#fff;--card-shadow:rgba(0,0,0,0.05);--accent-color:#4b9eff;
-      --stat-icon-bg:#e1f0ff;--stat-icon-color:#4b9eff;
     }
     /* SIDEBAR */
     .sidebar{width:var(--sidebar-width);background:var(--sidebar-bg);
       border-right:1px solid var(--sidebar-border);display:flex;flex-direction:column;
       padding-top:24px;height:100vh;overflow-y:auto;position:fixed;top:0;left:0;}
     .sidebar .brand{display:flex;align-items:center;justify-content:center;margin-bottom:32px;padding:0 16px}
-    .sidebar .material-icons{color:var(--icon-color)}
+    .sidebar .brand .material-icons{font-size:32px;color:var(--active-border);margin-right:8px}
+    .sidebar .brand .brand-text{font-size:20px;font-weight:700;color:var(--text-color)}
+    .sidebar nav{flex-grow:1;list-style:none;padding-left:0}
+    .sidebar nav .nav-group{margin-bottom:24px}
     .sidebar nav .group-title{font-size:12px;font-weight:500;color:var(--heading-color);
       text-transform:uppercase;padding:0 24px;margin-bottom:8px;letter-spacing:.5px}
     .sidebar nav ul{list-style:none;padding-left:0}
+    .sidebar nav li{margin-bottom:4px}
     .sidebar nav a{display:flex;align-items:center;gap:12px;padding:10px 24px;
       text-decoration:none;color:var(--text-color);font-size:14px;
       border-right:4px solid transparent;transition:background-color .2s,border-color .2s}
     .sidebar nav a:hover{background:var(--hover-bg)}
     .sidebar nav a.active{background:var(--active-bg);border-right-color:var(--active-border)}
+    .sidebar nav a.active .material-icons{color:var(--active-border)}
     .logout{margin-top:auto;padding:16px;text-align:center;border-top:1px solid var(--sidebar-border)}
+    .logout a{display:flex;align-items:center;justify-content:center;gap:8px;
+      text-decoration:none;color:var(--text-color);font-size:14px;padding:8px 16px;
+      border-radius:4px;transition:background-color .2s}
+    .logout a:hover{background:var(--hover-bg)}
 
     /* CONTENT */
     .content{margin-left:var(--sidebar-width);padding:32px;height:100vh;overflow-y:auto}
@@ -53,39 +61,31 @@
     .user-table th, .user-table td{padding:16px;text-align:left;border-bottom:1px solid #e0e0e0}
     .user-table th{background:var(--active-bg);font-weight:500;color:var(--heading-color)}
     .user-table tr:last-child td{border-bottom:none}
+    .action-btn{background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:4px;transition:background-color .2s}
+    .action-btn:hover{background:var(--hover-bg)}
+    .action-btn .material-icons{font-size:20px;color:var(--icon-color)}
   </style>
 </head>
 <body>
   <aside class="sidebar">
     <div class="brand">
-      <span class="material-icons" style="font-size:32px;">local_pharmacy</span>
-      <span style="font-size:20px;font-weight:700;color:var(--text-color);margin-left:8px;">Pharmacie MTIR</span>
+      <span class="material-icons">local_pharmacy</span>
+      <span class="brand-text">Pharmacie MTIR</span>
     </div>
     <nav>
-      <div class="nav-group">
-        <ul>
-          <li><a href="dashboard.html?role=admin"><span class="material-icons">dashboard</span><span>Tableau de bord</span></a></li>
-        </ul>
-      </div>
-      <div class="nav-group">
-        <span class="group-title">Gestion du Stock</span>
-        <ul>
-          <li><a href="stock.html?role=admin"><span class="material-icons">inventory</span><span>Stock</span></a></li>
-          <li><a href="produit.html?role=admin"><span class="material-icons">add_box</span><span>Ajouter un produit</span></a></li>
-        </ul>
-      </div>
-      <div class="nav-group">
-        <span class="group-title">Utilisateurs</span>
-        <ul>
-          <li><a href="users.html?role=admin" class="active"><span class="material-icons">group</span><span>Liste Utilisateurs</span></a></li>
-        </ul>
-      </div>
-      <div class="nav-group">
-        <span class="group-title">Admin</span>
-        <ul>
-          <li><a href="logs.html?role=admin"><span class="material-icons">receipt_long</span><span>Logs</span></a></li>
-        </ul>
-      </div>
+      <div class="nav-group"><ul>
+        <li><a href="dashboard.html?role=admin"><span class="material-icons">dashboard</span><span>Tableau de bord</span></a></li>
+      </ul></div>
+      <div class="nav-group admin-only"><span class="group-title">Gestion du Stock</span><ul>
+        <li><a href="stock.html?role=admin"><span class="material-icons">inventory</span><span>Stock</span></a></li>
+        <li><a href="produit.html?role=admin"><span class="material-icons">add_box</span><span>Ajouter un produit</span></a></li>
+      </ul></div>
+      <div class="nav-group admin-only"><span class="group-title">Utilisateurs</span><ul>
+        <li><a href="users.html?role=admin" class="active"><span class="material-icons">group</span><span>Liste Utilisateurs</span></a></li>
+      </ul></div>
+      <div class="nav-group admin-only"><span class="group-title">Admin</span><ul>
+        <li><a href="logs.html?role=admin"><span class="material-icons">receipt_long</span><span>Logs</span></a></li>
+      </ul></div>
     </nav>
     <div class="logout"><a href="login.html"><span class="material-icons">logout</span><span>Déconnexion</span></a></div>
   </aside>
@@ -106,17 +106,33 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Exemple d'entrée -->
         <tr>
           <td>Dupont Jean</td>
           <td>Utilisateur</td>
           <td>jean.dupont@example.com</td>
           <td>
-            <button>Editer</button>
-            <button>Supprimer</button>
+            <button class="action-btn"><span class="material-icons">edit</span></button>
+            <button class="action-btn"><span class="material-icons">delete</span></button>
           </td>
         </tr>
-        <!-- À remplacer dynamiquement -->
+        <tr>
+          <td>Martin Claire</td>
+          <td>Administrateur</td>
+          <td>claire.martin@example.com</td>
+          <td>
+            <button class="action-btn"><span class="material-icons">edit</span></button>
+            <button class="action-btn"><span class="material-icons">delete</span></button>
+          </td>
+        </tr>
+        <tr>
+          <td>Nguyen Lucas</td>
+          <td>Utilisateur</td>
+          <td>lucas.nguyen@example.com</td>
+          <td>
+            <button class="action-btn"><span class="material-icons">edit</span></button>
+            <button class="action-btn"><span class="material-icons">delete</span></button>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
