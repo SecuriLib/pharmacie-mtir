@@ -96,9 +96,7 @@
     <table class="logs-table">
       <thead>
         <tr>
-          <th>Page</th>
-          <th>Action</th>
-          <th>Utilisateur</th>
+          <th>Message</th>
           <th>Date &amp; Heure</th>
         </tr>
       </thead>
@@ -125,13 +123,13 @@
     onSnapshot(logsQuery, snapshot => {
       tbody.innerHTML = '';
       snapshot.forEach(doc => {
-        const { page, action, user, timestamp } = doc.data();
+        const data = doc.data();
+        const message = data.message || '';
+        const timestamp = data.timestamp;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${page}</td>
-          <td>${action}</td>
-          <td>${user}</td>
-          <td>${timestamp.toDate().toLocaleString()}</td>
+          <td>${message}</td>
+          <td>${timestamp?.toDate().toLocaleString() || ''}</td>
         `;
         tbody.appendChild(tr);
       });
