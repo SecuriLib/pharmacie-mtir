@@ -23,6 +23,7 @@
       position: relative;
     }
     .hero::after {
+      content: 'INTERFACE UTILISATEUR';
       position: absolute;
       color: #fff;
       font-size: 1.75rem;
@@ -66,6 +67,14 @@
       box-shadow: 0 2px 12px rgba(0,0,0,0.1);
       padding: 1.5rem;
       margin-bottom: 2rem;
+    }
+    .form-image {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.1);
     }
     fieldset {
       border: none;
@@ -130,7 +139,21 @@
 
     <!-- Formulaire -->
     <form action="#" method="POST">
-      <!-- Exemple question 1 -->
+      <!-- Image de l'armoire -->
+      <img src="https://lh7-rt.googleusercontent.com/formsz/AN7BsVDH9VeKfEVWwRjbXSC6R8jOR4_HvHFakMDsm5Wh4Wf1LpkWCnfdPcPiRSHIlWSo-Mpwjeh40Je5ZG-SdUpI2zPdbMkKfsqpJTeusWpLgoVdIcC3Ny__uGCZdGQKjUJwTcER6KJjpQQTFqNSrK58UEfJ=w4000?key=yS58wdHiyb4u0Bd1ALb-nQ" alt="Armoires numérotées" class="form-image">
+
+      <!-- Question : Quel Étage ? -->
+      <fieldset>
+        <label>Quel Étage ? *</label>
+        <div class="radio-group">
+          <label><input type="radio" name="etage" value="Etage 1" required> Etage 1</label>
+          <label><input type="radio" name="etage" value="Etage 2"> Etage 2</label>
+          <label><input type="radio" name="etage" value="Etage 3"> Etage 3</label>
+          <label><input type="radio" name="etage" value="Etage 4"> Etage 4</label>
+        </div>
+      </fieldset>
+
+      <!-- Exemple question suivante -->
       <fieldset>
         <label for="nomPrenom">Nom et prénom * </label>
         <select id="nomPrenom" name="nomPrenom" required>
@@ -142,18 +165,7 @@
         </select>
       </fieldset>
 
-      <!-- Exemple question 2 -->
-      <fieldset>
-        <label>Quel Étage ? *</label>
-        <div class="radio-group">
-          <label><input type="radio" name="etage" value="Etage 1" required> Etage 1</label>
-          <label><input type="radio" name="etage" value="Etage 2"> Etage 2</label>
-          <label><input type="radio" name="etage" value="Etage 3"> Etage 3</label>
-          <label><input type="radio" name="etage" value="Etage 4"> Etage 4</label>
-        </div>
-      </fieldset>
-
-      <button type="submit">Envoyer</button>
+      <button type="submit">Suivant</button>
     </form>
 
   </div>
