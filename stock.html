@@ -19,18 +19,8 @@
     /* ================================
        RESET & VARIABLES
        ================================ */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    html, body {
-      height: 100%;
-      font-family: "Roboto", sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
-      overflow: hidden;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; font-family: "Roboto", sans-serif; background-color: #f5f5f5; color: #333; overflow: hidden; }
     :root {
       --sidebar-width: 240px;
       --sidebar-bg: #ffffff;
@@ -49,7 +39,6 @@
       --modal-overlay: rgba(0, 0, 0, 0.4);
       --modal-bg: #ffffff;
       --category-bg: #eef3f7;
-      /* recherche */
       --search-bg: #f0f4f8;
       --search-border: #d1d7de;
       --search-placeholder: #8a8f97;
@@ -59,234 +48,70 @@
        STYLES SEUILS
        ================================ */
     .seuil-orange { background-color: #fff3cd; }
-    .seuil-rouge  { background-color: #f8d7da; }
+    .seuil-rouge { background-color: #f8d7da; }
 
     /* ================================
        SIDEBAR
        ================================ */
-    .sidebar {
-      width: var(--sidebar-width);
-      background-color: var(--sidebar-bg);
-      border-right: 1px solid var(--sidebar-border);
-      display: flex;
-      flex-direction: column;
-      padding-top: 24px;
-      height: 100vh;
-      overflow-y: auto;
-      position: fixed;
-      top: 0;
-      left: 0;
-    }
+    .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); border-right: 1px solid var(--sidebar-border); display: flex; flex-direction: column; padding-top: 24px; height: 100vh; overflow-y: auto; position: fixed; top: 0; left: 0; }
     .sidebar::-webkit-scrollbar { display: none; }
-    .sidebar .brand {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 32px;
-      padding: 0 16px;
-    }
-    .sidebar .brand .material-icons {
-      font-size: 32px;
-      color: var(--active-border);
-      margin-right: 8px;
-    }
-    .sidebar .brand .brand-text {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-color);
-      white-space: nowrap;
-    }
-    .sidebar nav {
-      flex-grow: 1;
-      list-style: none;
-      padding-left: 0;
-    }
-    .sidebar nav .nav-group {
-      margin-bottom: 24px;
-    }
-    .sidebar nav .group-title {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--heading-color);
-      text-transform: uppercase;
-      padding: 0 24px;
-      margin-bottom: 8px;
-      letter-spacing: 0.5px;
-    }
+    .sidebar .brand { display: flex; align-items: center; justify-content: center; margin-bottom: 32px; padding: 0 16px; }
+    .sidebar .brand .material-icons { font-size: 32px; color: var(--active-border); margin-right: 8px; }
+    .sidebar .brand .brand-text { font-size: 20px; font-weight: 700; color: var(--text-color); }
+    .sidebar nav { flex-grow: 1; list-style: none; padding-left: 0; }
+    .sidebar nav .nav-group { margin-bottom: 24px; }
+    .sidebar nav .group-title { font-size: 12px; font-weight: 500; color: var(--heading-color); text-transform: uppercase; padding: 0 24px; margin-bottom: 8px; letter-spacing: 0.5px; }
     .sidebar nav ul { list-style: none; padding-left: 0; }
     .sidebar nav li { margin-bottom: 4px; }
-    .sidebar nav a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 24px;
-      text-decoration: none;
-      color: var(--text-color);
-      font-size: 14px;
-      border-right: 4px solid transparent;
-      transition: background-color .2s, border-color .2s;
-      white-space: nowrap;
-    }
+    .sidebar nav a { display: flex; align-items: center; gap: 12px; padding: 10px 24px; text-decoration: none; color: var(--text-color); font-size: 14px; border-right: 4px solid transparent; transition: background-color .2s, border-color .2s; }
     .sidebar nav a:hover { background-color: var(--hover-bg); }
-    .sidebar nav a.active {
-      background-color: var(--active-bg);
-      border-right-color: var(--active-border);
-    }
-    .sidebar nav a.active .material-icons {
-      color: var(--active-border);
-    }
-    .logout {
-      margin-top: auto;
-      padding: 16px;
-      text-align: center;
-      border-top: 1px solid var(--sidebar-border);
-    }
-    .logout a {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: var(--text-color);
-      text-decoration: none;
-      font-size: 14px;
-      padding: 8px 16px;
-      border-radius: 4px;
-      transition: background-color .2s;
-    }
+    .sidebar nav a.active { background-color: var(--active-bg); border-right-color: var(--active-border); }
+    .sidebar nav a.active .material-icons { color: var(--active-border); }
+    .logout { margin-top: auto; padding: 16px; text-align: center; border-top: 1px solid var(--sidebar-border); }
+    .logout a { display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; color: var(--text-color); font-size: 14px; padding: 8px 16px; border-radius: 4px; transition: background-color .2s; }
     .logout a:hover { background-color: var(--hover-bg); }
 
     /* ================================
        CONTENU PRINCIPAL
        ================================ */
-    .content {
-      margin-left: var(--sidebar-width);
-      padding: 32px;
-      height: 100vh;
-      overflow-y: auto;
-    }
+    .content { margin-left: var(--sidebar-width); padding: 32px; height: 100vh; overflow-y: auto; }
     .content::-webkit-scrollbar { display: none; }
-    .page-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
-    .page-header h1 {
-      font-size: 28px;
-      color: #34495e;
-    }
-    #searchInput {
-      width: 280px;
-      max-width: 40%;
-      padding: 8px 36px 8px 12px;
-      font-size: 14px;
-      border: 1px solid var(--search-border);
-      border-radius: 20px;
-      background-color: var(--search-bg);
-      background-image: url('data:image/svg+xml;utf8,<svg fill="%238a8f97" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM4.5 9.5A5 5 0 1 1 14.5 9.5A5 5 0 0 1 4.5 9.5Z"/></svg>');
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-    }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .page-header h1 { font-size: 28px; color: #34495e; }
+    #searchInput { width: 280px; max-width: 40%; padding: 8px 36px 8px 12px; font-size: 14px; border: 1px solid var(--search-border); border-radius: 20px; background-color: var(--search-bg); background-image: url('data:image/svg+xml;utf8,<svg fill="%238a8f97" .../></svg>'); background-repeat: no-repeat; background-position: right 10px center; }
     #searchInput::placeholder { color: var(--search-placeholder); }
-    #searchInput:focus {
-      outline: none;
-      border-color: var(--accent-color);
-      box-shadow: 0 0 4px rgba(75,158,255,0.4);
-    }
+    #searchInput:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 4px rgba(75,158,255,0.4); }
 
     /* ================================
        TABLE STOCK
        ================================ */
-    .stock-table {
-      width:100%;
-      border-collapse:collapse;
-      background: var(--card-bg);
-      border:1px solid var(--card-shadow);
-      border-radius:8px;
-      overflow:hidden;
-      box-shadow:0 4px 12px var(--card-shadow);
-    }
-    .stock-table th,
-    .stock-table td {
-      padding:12px 16px;
-      text-align:left;
-    }
-    .stock-table th {
-      background: var(--table-header-bg);
-      color: var(--text-color);
-      text-transform: uppercase;
-      font-size:14px;
-      letter-spacing:.5px;
-    }
-    .stock-table tr:nth-child(even) { background:#fafafa; }
-    .stock-table tr:hover       { background: var(--table-row-hover); }
-    .stock-table td.stock,
-    .stock-table td.current {
-      width:120px;
-      text-align:center;
-    }
-    .stock-table td.edit {
-      width:48px;
-      text-align:center;
-    }
-    .stock-table td.edit .material-icons {
-      cursor:pointer;
-      transition: color .2s;
-    }
-    .stock-table td.edit .material-icons:hover {
-      color: var(--active-border);
-    }
-    .category-row td {
-      background: var(--category-bg);
-      font-style:italic;
-      color: var(--heading-color);
-      padding:8px 16px;
-      border-top:1px solid var(--table-row-hover);
-      border-bottom:1px solid var(--table-row-hover);
-    }
-
-    /* override striped pour seuils */
-    .stock-table tr.seuil-orange td {
-      background-color: #fff3cd !important;
-    }
-    .stock-table tr.seuil-rouge td {
-      background-color: #f8d7da !important;
-    }
+    .stock-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border: 1px solid var(--card-shadow); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px var(--card-shadow); }
+    .stock-table th, .stock-table td { padding: 12px 16px; text-align: left; }
+    .stock-table th { background: var(--table-header-bg); color: var(--text-color); text-transform: uppercase; font-size: 14px; letter-spacing: .5px; }
+    .stock-table tr:nth-child(even) { background: #fafafa; }
+    .stock-table tr:hover { background: var(--table-row-hover); }
+    .stock-table td.stock, .stock-table td.current { width: 120px; text-align: center; }
+    .stock-table td.edit { width: 48px; text-align: center; }
+    .stock-table td.edit .material-icons { cursor: pointer; transition: color .2s; }
+    .stock-table td.edit .material-icons:hover { color: var(--active-border); }
+    .category-row td { background: var(--category-bg); font-style: italic; color: var(--heading-color); padding: 8px 16px; border-top: 1px solid var(--table-row-hover); border-bottom: 1px solid var(--table-row-hover); }
+    .stock-table tr.seuil-orange td { background-color: #fff3cd !important; }
+    .stock-table tr.seuil-rouge  td { background-color: #f8d7da !important; }
 
     /* ================================
-       DND / modal
+       DND / MODAL
        ================================ */
     tr[draggable="true"] { cursor: grab; }
-    .dragging            { opacity: .5; }
-    .modal-overlay {
-      position:fixed; top:0; left:0;
-      width:100vw; height:100vh;
-      background: var(--modal-overlay);
-      display:none; align-items:center; justify-content:center;
-      z-index:100;
-    }
-    .modal {
-      background:var(--modal-bg);
-      border-radius:8px;
-      width:320px;
-      padding:24px;
-      box-shadow:0 6px 20px var(--card-shadow);
-      text-align:center;
-    }
-    .modal h2 { font-size:20px; margin-bottom:16px; color:#34495e; }
-    .modal input[type="number"] {
-      width:100%; padding:10px 12px; margin-bottom:20px;
-      font-size:14px; border:1px solid #ccc; border-radius:6px;
-    }
-    .modal button {
-      padding:10px 16px; margin:0 8px; font-size:14px;
-      border:none; border-radius:6px; cursor:pointer;
-      transition:background-color .2s;
-    }
-    .btn-cancel { background:#ccc; color:#fff; }
-    .btn-cancel:hover { background:#aaa; }
-    .btn-save   { background:var(--accent-color); color:#fff; }
-    .btn-save:hover { background:#3a8ee6; }
+    .dragging { opacity: .5; }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--modal-overlay); display: none; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: var(--modal-bg); border-radius: 8px; width: 320px; padding: 24px; box-shadow: 0 6px 20px var(--card-shadow); text-align: center; }
+    .modal h2 { font-size: 20px; margin-bottom: 16px; color: #34495e; }
+    .modal input[type="number"] { width: 100%; padding: 10px 12px; margin-bottom: 20px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; }
+    .modal button { padding: 10px 16px; margin: 0 8px; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; transition: background-color .2s; }
+    .btn-cancel { background: #ccc; color: #fff; }
+    .btn-cancel:hover { background: #aaa; }
+    .btn-save   { background: var(--accent-color); color: #fff; }
+    .btn-save:hover { background: #3a8ee6; }
   </style>
 </head>
 <body>
@@ -312,9 +137,7 @@
         <li><a href="#"><span class="material-icons">receipt_long</span><span>Logs</span></a></li>
       </ul></div>
     </nav>
-    <div class="logout">
-      <a href="login.html"><span class="material-icons">logout</span><span>Déconnexion</span></a>
-    </div>
+    <div class="logout"><a href="login.html"><span class="material-icons">logout</span><span>Déconnexion</span></a></div>
   </aside>
 
   <!-- CONTENU PRINCIPAL -->
@@ -324,29 +147,17 @@
       <input type="text" id="searchInput" placeholder="Rechercher un produit…" />
     </div>
     <table class="stock-table">
-      <thead>
-        <tr>
-          <th>Nom du produit</th>
-          <th>Quantité en stock</th>
-          <th>Quantité actuelle</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="stockTbody">
-        <!-- JS insère -->
-      </tbody>
+      <thead><tr><th>Nom du produit</th><th>Quantité en stock</th><th>Quantité actuelle</th><th></th></tr></thead>
+      <tbody id="stockTbody"></tbody>
     </table>
   </div>
 
-  <!-- MODAL -->
+  <!-- MODAL de modification -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <h2>Modifier la quantité</h2>
       <input type="number" id="modalInput" min="0" />
-      <div>
-        <button class="btn-cancel" id="modalCancel">Annuler</button>
-        <button class="btn-save"   id="modalSave">Enregistrer</button>
-      </div>
+      <div><button class="btn-cancel" id="modalCancel">Annuler</button><button class="btn-save" id="modalSave">Enregistrer</button></div>
     </div>
   </div>
 
@@ -355,25 +166,19 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import {
       getFirestore, collection, getDocs,
-      updateDoc, doc, orderBy, query
+      updateDoc, doc, orderBy, query,
+      addDoc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "...",
-      authDomain: "...",
-      projectId: "pharmacie-mtir-db",
-      storageBucket: "...",
-      messagingSenderId: "...",
-      appId: "...",
-      measurementId: "..."
-    };
+    const firebaseConfig = { apiKey:"…", authDomain:"…", projectId:"pharmacie-mtir-db", storageBucket:"…", messagingSenderId:"…", appId:"…", measurementId:"…" };
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
     const produitsCol = collection(db, "produits");
+    const logsCol     = collection(db, "logs");
 
     function getQueryParams() {
       const p = {};
-      window.location.search.substring(1).split("&").forEach(pair=>{
+      window.location.search.substring(1).split("&").forEach(pair => {
         if (!pair) return;
         const [k,v] = pair.split("=");
         p[decodeURIComponent(k)] = decodeURIComponent(v||"");
@@ -381,9 +186,7 @@
       return p;
     }
     const role = getQueryParams().role || "user";
-    if (role !== "admin") {
-      document.querySelectorAll(".admin-only").forEach(el=>el.style.display="none");
-    }
+    if (role !== "admin") document.querySelectorAll(".admin-only").forEach(el=>el.style.display="none");
 
     const stockTbody   = document.getElementById("stockTbody");
     const modalOverlay = document.getElementById("modalOverlay");
@@ -402,43 +205,38 @@
 
     function addProductRow(prod) {
       const tr = document.createElement("tr");
-      tr.dataset.id           = prod.id;
-      tr.dataset.seuilOrange  = prod.seuilOrange;
-      tr.dataset.seuilRouge   = prod.seuilRouge;
-      tr.setAttribute("draggable","true");
+      tr.dataset.id          = prod.id;
+      tr.dataset.seuilOrange = prod.seuilOrange;
+      tr.dataset.seuilRouge  = prod.seuilRouge;
+      tr.setAttribute("draggable", "true");
       tr.innerHTML = `
         <td class="cell-name">${prod.name}</td>
         <td class="stock">${prod.stock}</td>
         <td class="current">${prod.stock}</td>
         <td class="edit"><span class="material-icons">edit</span></td>
       `;
-      // coloration
       if (prod.stock <= prod.seuilRouge) tr.classList.add("seuil-rouge");
       else if (prod.stock <= prod.seuilOrange) tr.classList.add("seuil-orange");
 
-      // dnd
-      tr.addEventListener("dragstart", e => {
-        e.dataTransfer.setData("text/plain", prod.id);
-        tr.classList.add("dragging");
-      });
+      // DnD handlers
+      tr.addEventListener("dragstart", e => { e.dataTransfer.setData("text/plain", prod.id); tr.classList.add("dragging"); });
       tr.addEventListener("dragend", async () => {
         tr.classList.remove("dragging");
         const rows = Array.from(stockTbody.querySelectorAll("tr[draggable='true']"));
-        for (let i = 0; i < rows.length; i++) {
-          await updateDoc(doc(db,"produits",rows[i].dataset.id),{ order:i });
+        for (let i=0; i<rows.length; i++) {
+          await updateDoc(doc(db, "produits", rows[i].dataset.id), { order: i });
         }
       });
       tr.addEventListener("dragover", e => {
         e.preventDefault();
-        const d = document.querySelector(".dragging");
-        if (!d || d === tr) return;
-        const r = tr.getBoundingClientRect();
-        const before = (e.clientY - r.top) < r.height/2;
+        const d = document.querySelector(".dragging"); if (!d || d===tr) return;
+        const rect = tr.getBoundingClientRect();
+        const before = (e.clientY - rect.top) < rect.height/2;
         tr.parentNode.insertBefore(d, before ? tr : tr.nextSibling);
       });
 
-      // édition stock
-      tr.querySelector("td.edit .material-icons").addEventListener("click", ()=>{
+      // Edit stock
+      tr.querySelector("td.edit .material-icons").addEventListener("click", () => {
         activeRow = tr;
         modalInput.value = tr.querySelector("td.stock").textContent.trim();
         modalOverlay.style.display = "flex";
@@ -450,89 +248,72 @@
 
     async function loadAllProducts() {
       stockTbody.innerHTML = "";
-      const q = query(produitsCol, orderBy("__name__","asc"));
+      const q = query(produitsCol, orderBy("__name__", "asc"));
       try {
         const snap = await getDocs(q);
         let lastCat = null;
-        snap.forEach(docSnap=>{
+        snap.forEach(docSnap => {
           const d = docSnap.data();
-          const prod = {
-            id: docSnap.id,
-            name: d.name||"",
-            category: d.category||"",
-            stock: d.stock||0,
-            seuilOrange: d.seuilOrange||0,
-            seuilRouge: d.seuilRouge||0
-          };
-          if (prod.category !== lastCat) {
-            addCategoryRow(prod.category);
-            lastCat = prod.category;
-          }
+          const prod = { id: docSnap.id, name: d.name||"", category: d.category||"", stock: d.stock||0, seuilOrange: d.seuilOrange||0, seuilRouge: d.seuilRouge||0 };
+          if (prod.category !== lastCat) { addCategoryRow(prod.category); lastCat = prod.category; }
           addProductRow(prod);
         });
         filterTable();
-      } catch(err){
-        console.error("Erreur loadAllProducts:",err);
-      }
+      } catch (err) { console.error("Erreur loadAllProducts:", err); }
     }
 
-    function filterTable(){
-      const v = searchInput.value.trim().toLowerCase();
-      const rows = Array.from(stockTbody.querySelectorAll("tr"));
-      let i = 0;
-      while(i<rows.length){
+    function filterTable() {
+      const val = searchInput.value.trim().toLowerCase();
+      const rows = Array.from(stockTbody.querySelectorAll("tr")); let i=0;
+      while(i<rows.length) {
         const row = rows[i];
-        if (row.classList.contains("category-row")){
+        if (row.classList.contains("category-row")) {
           let any=false, j=i+1;
-          while(j<rows.length && !rows[j].classList.contains("category-row")){
+          while(j<rows.length && !rows[j].classList.contains("category-row")) {
             const pr = rows[j];
-            const name = pr.querySelector(".cell-name").textContent.toLowerCase();
-            const show = !v || name.includes(v);
+            const nm = pr.querySelector(".cell-name").textContent.toLowerCase();
+            const show = !val || nm.includes(val);
             pr.style.display = show?"":"none";
-            any = any||show;
-            j++;
+            any = any||show; j++;
           }
-          row.style.display = any?"":"none";
-          i=j;
+          row.style.display = any?"":"none"; i=j;
         } else {
           const nm = row.querySelector(".cell-name").textContent.toLowerCase();
-          const show = !v || nm.includes(v);
-          row.style.display = show?"":"none";
-          i++;
+          const show = !val || nm.includes(val);
+          row.style.display = show?"":"none"; i++;
         }
       }
     }
-    searchInput.addEventListener("input",filterTable);
+    searchInput.addEventListener("input", filterTable);
 
-    function closeModal(){
+    function closeModal() {
       modalOverlay.style.display = "none";
       activeRow = null;
     }
     modalCancel.addEventListener("click", closeModal);
-    modalOverlay.addEventListener("click", e=>{ if (e.target===modalOverlay) closeModal(); });
+    modalOverlay.addEventListener("click", e => { if (e.target===modalOverlay) closeModal(); });
 
-    modalSave.addEventListener("click", async ()=>{
+    modalSave.addEventListener("click", async () => {
       if (!activeRow) return;
-      const v = parseInt(modalInput.value,10);
-      if (isNaN(v)||v<0){
-        alert("Veuillez entrer un nombre entier ≥ 0.");
-        return;
-      }
+      const v = parseInt(modalInput.value, 10);
+      if (isNaN(v)||v<0) { alert("Veuillez entrer un nombre entier ≥ 0."); return; }
       const id = activeRow.dataset.id;
       try {
-        await updateDoc(doc(db,"produits",id),{ stock: v });
+        await updateDoc(doc(db, "produits", id), { stock: v });
+        // Write a log entry
+        await addDoc(logsCol, {
+          message: `Stock mis à jour pour "${activeRow.querySelector('.cell-name').textContent}" : ${v} unités.`,
+          timestamp: serverTimestamp()
+        });
         activeRow.querySelector("td.stock").textContent = v;
         activeRow.querySelector("td.current").textContent = v;
-        // recoloration
         activeRow.classList.remove("seuil-orange","seuil-rouge");
         const o = parseInt(activeRow.dataset.seuilOrange,10);
         const r = parseInt(activeRow.dataset.seuilRouge,10);
         if (v <= r) activeRow.classList.add("seuil-rouge");
         else if (v <= o) activeRow.classList.add("seuil-orange");
         closeModal();
-      } catch(err){
-        console.error("Erreur update stock:",err);
-      }
+      } catch (err) { console.error("Erreur update stock:", err); }
     });
 
     window.addEventListener("DOMContentLoaded", loadAllProducts);
