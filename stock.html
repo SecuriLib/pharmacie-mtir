@@ -110,6 +110,11 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs,
+  updateDoc, doc, orderBy, query,
+  addDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
     import {
       getFirestore, collection, getDocs,
       updateDoc, doc, orderBy, query,
