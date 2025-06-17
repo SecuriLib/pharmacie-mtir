@@ -102,29 +102,42 @@
           <th>Date &amp; Heure</th>
         </tr>
       </thead>
-      <tbody>
-        <!-- Exemple statique -->
-        <tr>
-          <td>Stock</td>
-          <td>Mise à jour quantité (Gants S: +10)</td>
-          <td>Admin</td>
-          <td>17/06/2025 09:40:12</td>
-        </tr>
-        <tr>
-          <td>Produit</td>
-          <td>Ajout nouveau produit (Paracétamol 500mg)</td>
-          <td>Admin</td>
-          <td>17/06/2025 08:15:45</td>
-        </tr>
-        <tr>
-          <td>Utilisateur</td>
-          <td>Suppression utilisateur (dupont.jean)</td>
-          <td>Admin</td>
-          <td>16/06/2025 17:22:30</td>
-        </tr>
-        <!-- À remplacer dynamiquement -->
+      <tbody id="logsBody">
+        <!-- Les logs s'affichent ici -->
       </tbody>
     </table>
   </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+    // Config Firebase
+    const firebaseConfig = { apiKey:"…", authDomain:"…", projectId:"pharmacie-mtir-db", storageBucket:"…", messagingSenderId:"…", appId:"…" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Écoute en temps réel de la collection 'logs'
+    const logsRef = collection(db, 'logs');
+    const logsQuery = query(logsRef, orderBy('timestamp', 'desc'));
+    const tbody = document.getElementById('logsBody');
+
+    onSnapshot(logsQuery, snapshot => {
+      tbody.innerHTML = '';
+      snapshot.forEach(doc => {
+        const { page, action, user, timestamp } = doc.data();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${page}</td>
+          <td>${action}</td>
+          <td>${user}</td>
+          <td>${timestamp.toDate().toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }, err => {
+      console.error('Erreur écoute logs :', err);
+    });
+  </script>
 </body>
 </html>
