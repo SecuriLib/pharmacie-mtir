@@ -1,131 +1,131 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pharmacie MTIR - Logs</title>
-
-  <!-- Roboto & Material Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-
+  <!-- Roboto + Material Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     /* RESET & VARIABLES */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; font-family: 'Roboto', sans-serif; background: #f5f5f5; color: #333; }
+    body { font-family: 'Roboto', sans-serif; background: #f5f5f5; color: #333; overflow-x: hidden; }
     :root {
       --sidebar-w: 240px; --clr-bg: #fff; --clr-border: #e0e0e0;
       --clr-text: #495057; --clr-heading: #34495e; --clr-accent: #4b9eff;
       --clr-hover: #f3f4f6; --clr-card: #fff; --shadow: 0 2px 8px rgba(0,0,0,0.05);
+      --table-bg: #fff; --table-header: #f1f3f5; --table-hover: #fafafa;
     }
-    /* SIDEBAR */
-    .sidebar {
-      width: var(--sidebar-w); position: fixed; top: 0; left: 0; height: 100%;
-      background: var(--clr-bg); border-right: 1px solid var(--clr-border);
-      display: flex; flex-direction: column; padding: 24px 0; overflow-y: auto;
-    }
-    .brand { display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
-    .brand .material-icons { font-size: 32px; color: var(--clr-accent); margin-right: 8px; }
-    .brand-text { font-size: 20px; font-weight: 700; color: var(--clr-text); }
-    nav { flex: 1; }
-    .group-title { font-size: 12px; color: var(--clr-text); text-transform: uppercase;
-      padding: 0 24px; margin-top: 16px; margin-bottom: 8px; letter-spacing: .5px;
-    }
-    nav a { display: flex; align-items: center; gap: 12px; padding: 10px 24px;
-      text-decoration: none; color: var(--clr-text); border-right: 4px solid transparent;
-      transition: background .2s;
-    }
-    nav a:hover { background: var(--clr-hover); }
-    nav a.active { background: var(--clr-hover); border-right-color: var(--clr-accent); }
-    nav a.active .material-icons { color: var(--clr-accent); }
-    .logout { margin-top: auto; text-align: center; padding: 16px 0; border-top: 1px solid var(--clr-border); }
-    .logout a { display: inline-flex; align-items: center; gap: 8px; color: var(--clr-text);
-      text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background .2s;
-    }
-    .logout a:hover { background: var(--clr-hover); }
-
+    /* SIDEBAR (identique aux autres pages) */
+    .sidebar { width: var(--sidebar-w); position: fixed; top: 0; left: 0; height: 100%; background: var(--clr-bg); border-right: 1px solid var(--clr-border); display: flex; flex-direction: column; padding: 24px 0; }
+    .sidebar .brand { display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
+    .sidebar .brand .material-icons { font-size: 32px; color: var(--clr-accent); margin-right: 8px; }
+    .sidebar .brand-text { font-size: 20px; font-weight: 700; color: var(--clr-text); }
+    nav { flex: 1; overflow-y: auto; }
+    .group-title { font-size: 12px; color: var(--clr-text); text-transform: uppercase; padding: 0 24px; margin: 16px 0 8px; }
+    a { display: flex; align-items: center; gap: 12px; padding: 10px 24px; text-decoration: none; color: var(--clr-text); border-right: 4px solid transparent; transition: background .2s; }
+    a:hover { background: var(--clr-hover); }
+    a.active { background: var(--clr-hover); border-right-color: var(--clr-accent); }
+    .logout { padding: 16px; text-align: center; border-top: 1px solid var(--clr-border); }
     /* CONTENT */
-    .content { margin-left: var(--sidebar-w); padding: 32px; min-height: 100vh; }
+    .content { margin-left: var(--sidebar-w); padding: 32px; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .page-header h1 { font-size: 28px; color: var(--clr-heading); }
-    .welcome-msg { font-size: 16px; color: #777; }
-
-    /* LOGS LIST */
-    .logs-list { list-style: none; }
-    .logs-list li {
-      background: var(--clr-card); margin-bottom: 16px; padding: 16px;
-      box-shadow: var(--shadow); border-left: 4px solid var(--clr-accent);
-      transition: transform .2s;
-    }
-    .logs-list li:hover { transform: translateY(-2px); }
-    .log-msg { font-size: 14px; line-height: 1.5; color: #444; margin-bottom: 8px; }
-    .log-time { font-size: 12px; color: #888; text-align: right; }
+    /* FILTRE */
+    .filter { margin-bottom: 16px; display: flex; gap: 12px; align-items: center; }
+    .filter label { font-size: 14px; color: var(--clr-text); }
+    .filter select, .filter input { padding: 8px 12px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+    /* TABLE */
+    .logs-table { width: 100%; border-collapse: collapse; background: var(--table-bg); box-shadow: var(--shadow); border-radius: 8px; overflow: hidden; }
+    .logs-table th, .logs-table td { padding: 12px 16px; text-align: left; }
+    .logs-table th { background: var(--table-header); font-size: 14px; text-transform: uppercase; }
+    .logs-table tbody tr:nth-child(even) { background: var(--table-hover); }
+    .logs-table tbody tr:hover { background: #fff; }
   </style>
 </head>
 <body>
   <aside class="sidebar">
-    <div class="brand">
-      <span class="material-icons">local_pharmacy</span>
-      <span class="brand-text">Pharmacie MTIR</span>
-    </div>
+    <div class="brand"><span class="material-icons">local_pharmacy</span><span class="brand-text">Pharmacie MTIR</span></div>
     <nav>
-      <ul>
-        <li><a href="dashboard.html?role=admin"><span class="material-icons">dashboard</span>Tableau de bord</a></li>
-      </ul>
+      <ul><li><a href="dashboard.html?role=admin"><span class="material-icons">dashboard</span>Tableau de bord</a></li></ul>
       <div class="group-title">Gestion du Stock</div>
-      <ul>
-        <li><a href="stock.html?role=admin"><span class="material-icons">inventory</span>Stock</a></li>
-        <li><a href="produit.html?role=admin"><span class="material-icons">add_box</span>Ajouter un produit</a></li>
-      </ul>
+      <ul><li><a href="stock.html?role=admin"><span class="material-icons">inventory</span>Stock</a></li><li><a href="produit.html?role=admin"><span class="material-icons">add_box</span>Produits</a></li></ul>
       <div class="group-title">Utilisateurs</div>
-      <ul>
-        <li><a href="users.html?role=admin"><span class="material-icons">group</span>Liste Utilisateurs</a></li>
-      </ul>
+      <ul><li><a href="users.html?role=admin"><span class="material-icons">group</span>Utilisateurs</a></li></ul>
       <div class="group-title">Admin</div>
-      <ul>
-        <li><a href="logs.html?role=admin" class="active"><span class="material-icons">receipt_long</span>Logs</a></li>
-      </ul>
+      <ul><li><a href="logs.html?role=admin" class="active"><span class="material-icons">receipt_long</span>Logs</a></li></ul>
     </nav>
-    <div class="logout">
-      <a href="login.html"><span class="material-icons">logout</span>Déconnexion</a>
-    </div>
+    <div class="logout"><a href="login.html"><span class="material-icons">logout</span>Déconnexion</a></div>
   </aside>
 
   <div class="content">
-    <div class="page-header">
-      <h1>Logs des modifications</h1>
-      <div class="welcome-msg">Bonjour, <strong>Admin</strong> !</div>
+    <div class="page-header"><h1>Logs des modifications</h1></div>
+    <div class="filter">
+      <label for="filterUser">Utilisateur :</label>
+      <select id="filterUser"><option value="all">Tous</option></select>
+      <label for="filterAction">Action contient :</label>
+      <input type="text" id="filterAction" placeholder="Filtrer...">
     </div>
-
-    <ul class="logs-list" id="logsBody">
-      <!-- Les logs s'affichent ici -->
-    </ul>
+    <table class="logs-table">
+      <thead>
+        <tr><th>Date & Heure</th><th>Utilisateur</th><th>Message</th></tr>
+      </thead>
+      <tbody id="logsBody"></tbody>
+    </table>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-    const firebaseConfig = { apiKey: "…", authDomain: "…", projectId: "pharmacie-mtir-db", storageBucket: "…", messagingSenderId: "…", appId: "…" };
+    const firebaseConfig = { apiKey:"…", authDomain:"…", projectId:"pharmacie-mtir-db", storageBucket:"…", messagingSenderId:"…", appId:"…" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const logsCol = collection(db, 'logs');
+    const logsQuery = query(logsCol, orderBy('timestamp', 'desc'));
 
-    const logsRef = collection(db, 'logs');
-    const logsQuery = query(logsRef, orderBy('timestamp', 'desc'));
-    const container = document.getElementById('logsBody');
+    const logsBody = document.getElementById('logsBody');
+    const filterUser = document.getElementById('filterUser');
+    const filterAction = document.getElementById('filterAction');
+    let allLogs = [];
+
+    function renderLogs() {
+      const userVal = filterUser.value;
+      const actionVal = filterAction.value.toLowerCase();
+      logsBody.innerHTML = '';
+      allLogs.filter(log =>
+        (userVal === 'all' || log.user === userVal) &&
+        log.message.toLowerCase().includes(actionVal)
+      ).forEach(log => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${log.timestamp}</td>
+          <td>${log.user}</td>
+          <td>${log.message}</td>
+        `;
+        logsBody.appendChild(tr);
+      });
+    }
 
     onSnapshot(logsQuery, snapshot => {
-      container.innerHTML = '';
+      allLogs = [];
+      filterUser.innerHTML = '<option value="all">Tous</option>';
       snapshot.forEach(doc => {
-        const { message = '', timestamp } = doc.data();
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <div class="log-msg">${message}</div>
-          <div class="log-time">${timestamp?.toDate().toLocaleString() || ''}</div>
-        `;
-        container.appendChild(li);
+        const { user, message, timestamp } = doc.data();
+        const ts = timestamp.toDate().toLocaleString();
+        allLogs.push({ user, message, timestamp: ts });
       });
-    }, err => console.error('Erreur écoute logs :', err));
+      // populate users filter
+      Array.from(new Set(allLogs.map(l => l.user))).forEach(u => {
+        const opt = document.createElement('option'); opt.value = u; opt.textContent = u;
+        filterUser.appendChild(opt);
+      });
+      renderLogs();
+    });
+
+    filterUser.addEventListener('change', renderLogs);
+    filterAction.addEventListener('input', renderLogs);
   </script>
 </body>
 </html>
