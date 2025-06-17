@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pharmacie MTIR - Logs</title>
+
+  <!-- Roboto + Material Icons -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* RESET & VARIABLES */
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;font-family:"Roboto",sans-serif;background:#f5f5f5;color:#333;overflow:hidden}
+    :root{
+      --sidebar-width:240px;--sidebar-bg:#fff;--sidebar-border:#e0e0e0;
+      --text-color:#495057;--heading-color:#6c757d;--active-bg:#f3f4f6;
+      --active-border:#5c7cfa;--icon-color:#6c757d;--hover-bg:#f8f9fa;
+      --card-bg:#fff;--card-shadow:rgba(0,0,0,0.05);--accent-color:#4b9eff;
+    }
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar-width);background:var(--sidebar-bg);
+      border-right:1px solid var(--sidebar-border);display:flex;flex-direction:column;
+      padding-top:24px;height:100vh;overflow-y:auto;position:fixed;top:0;left:0;}
+    .sidebar .brand{display:flex;align-items:center;justify-content:center;margin-bottom:32px;padding:0 16px}
+    .sidebar .brand .material-icons{font-size:32px;color:var(--active-border);margin-right:8px}
+    .sidebar .brand .brand-text{font-size:20px;font-weight:700;color:var(--text-color)}
+    .sidebar nav{flex-grow:1;list-style:none;padding-left:0}
+    .sidebar nav .nav-group{margin-bottom:24px}
+    .sidebar nav .group-title{font-size:12px;font-weight:500;color:var(--heading-color);
+      text-transform:uppercase;padding:0 24px;margin-bottom:8px;letter-spacing:.5px}
+    .sidebar nav ul{list-style:none;padding-left:0}
+    .sidebar nav li{margin-bottom:4px}
+    .sidebar nav a{display:flex;align-items:center;gap:12px;padding:10px 24px;
+      text-decoration:none;color:var(--text-color);font-size:14px;
+      border-right:4px solid transparent;transition:background-color .2s,border-color .2s}
+    .sidebar nav a:hover{background:var(--hover-bg)}
+    .sidebar nav a.active{background:var(--active-bg);border-right-color:var(--active-border)}
+    .sidebar nav a.active .material-icons{color:var(--active-border)}
+    .logout{margin-top:auto;padding:16px;text-align:center;border-top:1px solid var(--sidebar-border)}
+    .logout a{display:flex;align-items:center;justify-content:center;gap:8px;
+      text-decoration:none;color:var(--text-color);font-size:14px;padding:8px 16px;
+      border-radius:4px;transition:background-color .2s}
+    .logout a:hover{background:var(--hover-bg)}
+
+    /* CONTENT */
+    .content{margin-left:var(--sidebar-width);padding:32px;height:100vh;overflow-y:auto}
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .page-header h1{font-size:28px;color:#34495e}
+    .page-header .welcome-msg{font-size:16px;color:#777}
+
+    /* LOGS TABLE */
+    .logs-table{width:100%;border-collapse:collapse;background:var(--card-bg);box-shadow:0 4px 12px var(--card-shadow);border-radius:8px;overflow:hidden}
+    .logs-table th, .logs-table td{padding:16px;text-align:left;border-bottom:1px solid #e0e0e0}
+    .logs-table th{background:var(--active-bg);font-weight:500;color:var(--heading-color)}
+    .logs-table tr:last-child td{border-bottom:none}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="material-icons">local_pharmacy</span>
+      <span class="brand-text">Pharmacie MTIR</span>
+    </div>
+    <nav>
+      <div class="nav-group"><ul>
+        <li><a href="dashboard.html?role=admin"><span class="material-icons">dashboard</span><span>Tableau de bord</span></a></li>
+      </ul></div>
+      <div class="nav-group"><span class="group-title">Gestion du Stock</span><ul>
+        <li><a href="stock.html?role=admin"><span class="material-icons">inventory</span><span>Stock</span></a></li>
+        <li><a href="produit.html?role=admin"><span class="material-icons">add_box</span><span>Ajouter un produit</span></a></li>
+      </ul></div>
+      <div class="nav-group"><span class="group-title">Utilisateurs</span><ul>
+        <li><a href="users.html?role=admin"><span class="material-icons">group</span><span>Liste Utilisateurs</span></a></li>
+      </ul></div>
+      <div class="nav-group"><span class="group-title">Admin</span><ul>
+        <li><a href="logs.html?role=admin" class="active"><span class="material-icons">receipt_long</span><span>Logs</span></a></li>
+      </ul></div>
+    </nav>
+    <div class="logout"><a href="login.html"><span class="material-icons">logout</span><span>Déconnexion</span></a></div>
+  </aside>
+
+  <div class="content">
+    <div class="page-header">
+      <h1>Logs des modifications</h1>
+      <div class="welcome-msg">Bonjour, <strong>Admin</strong> !</div>
+    </div>
+
+    <table class="logs-table">
+      <thead>
+        <tr>
+          <th>Page</th>
+          <th>Action</th>
+          <th>Utilisateur</th>
+          <th>Date &amp; Heure</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Exemple statique -->
+        <tr>
+          <td>Stock</td>
+          <td>Mise à jour quantité (Gants S: +10)</td>
+          <td>Admin</td>
+          <td>17/06/2025 09:40:12</td>
+        </tr>
+        <tr>
+          <td>Produit</td>
+          <td>Ajout nouveau produit (Paracétamol 500mg)</td>
+          <td>Admin</td>
+          <td>17/06/2025 08:15:45</td>
+        </tr>
+        <tr>
+          <td>Utilisateur</td>
+          <td>Suppression utilisateur (dupont.jean)</td>
+          <td>Admin</td>
+          <td>16/06/2025 17:22:30</td>
+        </tr>
+        <!-- À remplacer dynamiquement -->
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
