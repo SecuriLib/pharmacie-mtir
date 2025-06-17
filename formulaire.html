@@ -2,119 +2,77 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Pharmacie du Centre de secours de MONTMIRAIL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interface Utilisateur - Gestion de Stock</title>
   <style>
-    body {
-      font-family: sans-serif;
-      max-width: 600px;
-      margin: 2em auto;
-      line-height: 1.5;
+    /* Reset et typographie de base */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.6; background: #f5f7fa; }
+
+    /* Header avec image */
+    .hero {
+      position: relative;
+      background: url('20a5d515-afcf-460d-b2a0-fcb6934827ed.png') center/cover no-repeat;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    h1 {
-      font-size: 1.75rem;
-      margin-bottom: 0.5em;
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
     }
-    p {
-      margin-bottom: 1.5em;
+    .hero h1 {
+      position: relative;
+      color: #fff;
+      font-size: 2rem;
+      letter-spacing: 2px;
     }
-    fieldset {
-      border: 1px solid #ccc;
-      padding: 1em;
-      margin-bottom: 1.5em;
-      border-radius: 4px;
+
+    /* Conteneur principal */
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    legend, label {
-      font-weight: bold;
+    .container h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #444;
     }
-    select, input[type="radio"] + span {
-      margin-top: 0.5em;
-      display: block;
+    .container p {
+      margin-bottom: 1rem;
     }
-    button {
-      padding: 0.6em 1.2em;
-      font-size: 1rem;
-      border: none;
-      border-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      cursor: pointer;
-      margin-right: 0.5em;
-    }
-    button[type="submit"] {
-      background: #4CAF50;
-      color: white;
-    }
-    button[type="reset"] {
-      background: #f44336;
-      color: white;
-    }
-    span.required {
-      color: red;
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin: 2rem 0;
+      font-size: 0.9rem;
+      color: #777;
     }
   </style>
 </head>
 <body>
+  <header class="hero">
+    <h1>INTERFACE UTILISATEUR</h1>
+  </header>
 
-  <h1>Pharmacie du Centre de secours de MONTMIRAIL</h1>
-  <p>Merci de prendre le temps de remplir ce formulaire. Vos réponses nous aideront à organiser le stock de la pharmacie.</p>
+  <main class="container">
+    <h2>Bienvenue</h2>
+    <p>Bienvenue sur l'interface Utilisateur de la Pharmacie du Centre de secours de MONTMIRAIL.</p>
+    <p>Merci de prendre le temps de remplir ce formulaire. Veuillez répondre à toutes les questions avec précision. Vos réponses nous aideront à organiser le stock de la pharmacie.</p>
+    <p>Cela ne prendra que quelques minutes. Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+  </main>
 
-  <form id="pharmacy-form" action="#" method="POST">
-
-    <!-- Question 1 -->
-    <fieldset>
-      <legend>Nom et prénom <span class="required">*</span></legend>
-      <label for="nomPrenom">
-        <select id="nomPrenom" name="nomPrenom" required>
-          <option value="">— Choisissez —</option>
-          <option>LEFEVRE Nicolas</option>
-          <option>HYONNE Nicolas</option>
-          <option>JAMBE Christophe</option>
-          <option>BEAUJEU Guillaume</option>
-          <option>HIMMESOETE Olivier</option>
-          <option>SEMANN Pierre</option>
-          <option>BOUCHE Claudette</option>
-          <option>GERARD Stéphane</option>
-          <option>THOMAS Quentin</option>
-          <option>PERCHAT Michael</option>
-          <option>COANUS Yvann</option>
-          <option>COUILLIET Thomas</option>
-          <option>BELORGEY Cyril</option>
-          <option>CHAMPAGNE Frédéric</option>
-          <option>GORNET Didier</option>
-          <option>MERCIER Jean Michel</option>
-          <option>VELY Guy</option>
-          <option>LAMBOURDIERE Isabelle</option>
-          <option>BRESCHBUHL Geoffrey</option>
-          <option>VAUCHER Alexandre</option>
-          <option>SAINT Djack</option>
-          <option>GILLE David</option>
-          <option>VERDRU Kevin</option>
-          <option>HYONNE Léa</option>
-          <option>GERARD Emilie</option>
-          <option>MARIE Angélique</option>
-          <option>THIMOND Julie</option>
-          <option>PORTAS Manuel</option>
-          <option>CHASLIN Quentin</option>
-          <option>RABOT Louison</option>
-          <option>RICHEZ Rodolphe</option>
-          <option>VERDU Killian</option>
-          <option>LEFEVRE Lucas</option>
-          <option>GALAAD Paul</option>
-        </select>
-      </label>
-    </fieldset>
-
-    <!-- Question 2 -->
-    <fieldset>
-      <legend>Quel Étage ? <span class="required">*</span></legend>
-      <label><input type="radio" name="etage" value="Etage 1" required><span>Etage 1</span></label>
-      <label><input type="radio" name="etage" value="Etage 2"><span>Etage 2</span></label>
-      <label><input type="radio" name="etage" value="Etage 3"><span>Etage 3</span></label>
-      <label><input type="radio" name="etage" value="Etage 4"><span>Etage 4</span></label>
-    </fieldset>
-
-    <button type="submit">Envoyer</button>
-    <button type="reset">Réinitialiser</button>
-  </form>
-
+  <footer>
+    &copy; 2025 Pharmacie du Centre • Tous droits réservés
+  </footer>
 </body>
 </html>
