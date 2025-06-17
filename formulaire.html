@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Formulaire Pharmacie du Centre</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2em auto; }
+    fieldset { margin-bottom: 1.5em; }
+    label { display: block; margin-bottom: 0.5em; }
+    button { padding: 0.5em 1em; font-size: 1em; }
+  </style>
+</head>
+<body>
+  <h1>Pharmacie du Centre de secours de MONTMIRAIL</h1>
+  <p>Merci de prendre le temps de remplir ce formulaire. Vos réponses nous aideront à organiser le stock de la pharmacie.</p>
+
+  <form action="https://docs.google.com/forms/d/e/1FAIpQLSf6ZS3i0Hf-JqBnFvT5gRJosUeRYXB7vf70V6Quo77qOlNpHw/formResponse"
+        method="POST" target="hidden_iframe">
+    
+    <!-- Question 1 : Nom et prénom -->
+    <fieldset>
+      <legend>Nom et prénom <span style="color: red;">*</span></legend>
+      <label for="entryNom">
+        <select name="entry.ENTRY_ID1" id="entryNom" required>
+          <option value="">— Choisissez —</option>
+          <option value="LEFEVRE Nicolas">LEFEVRE Nicolas</option>
+          <option value="HYONNE Nicolas">HYONNE Nicolas</option>
+          <!-- … autres options … -->
+        </select>
+      </label>
+    </fieldset>
+
+    <!-- Question 2 : Quel Étage ? -->
+    <fieldset>
+      <legend>Quel Étage ? <span style="color: red;">*</span></legend>
+      <label><input type="radio" name="entry.ENTRY_ID2" value="Etage 1" required> Etage 1</label>
+      <label><input type="radio" name="entry.ENTRY_ID2" value="Etage 2"> Etage 2</label>
+      <label><input type="radio" name="entry.ENTRY_ID2" value="Etage 3"> Etage 3</label>
+      <label><input type="radio" name="entry.ENTRY_ID2" value="Etage 4"> Etage 4</label>
+    </fieldset>
+
+    <button type="submit">Envoyer</button>
+    <button type="reset">Réinitialiser</button>
+  </form>
+
+  <!-- iframe invisible pour la réponse Google Forms -->
+  <iframe name="hidden_iframe" style="display:none;"></iframe>
+</body>
+</html>
