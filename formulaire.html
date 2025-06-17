@@ -7,72 +7,140 @@
   <style>
     /* Reset et typographie de base */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.6; background: #f5f7fa; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; background: #f0f4f8; }
 
-    /* Header avec image */
-    .hero {
-      position: relative;
-      background: url('20a5d515-afcf-460d-b2a0-fcb6934827ed.png') center/cover no-repeat;
-      height: 200px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0, 0, 0, 0.4);
-    }
-    .hero h1 {
-      position: relative;
-      color: #fff;
-      font-size: 2rem;
-      letter-spacing: 2px;
-    }
-
-    /* Conteneur principal */
-    .container {
+    /* Container global */
+    .wrapper {
       max-width: 800px;
       margin: 2rem auto;
-      padding: 0 1rem;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .container h2 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-      color: #444;
-    }
-    .container p {
-      margin-bottom: 1rem;
+      padding: 1rem;
     }
 
-    /* Footer */
-    footer {
-      text-align: center;
-      margin: 2rem 0;
-      font-size: 0.9rem;
-      color: #777;
+    /* Cadre général */
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+    .card-header {
+      background: #007bff;
+      color: #fff;
+      padding: 1rem;
+      font-size: 1.25rem;
+      letter-spacing: 1px;
+    }
+    .card-body {
+      padding: 1rem 1.5rem;
+      color: #444;
+      line-height: 1.6;
+    }
+    .card-body p {
+      margin-bottom: 0.75rem;
+    }
+    .required-note {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    /* Formulaire */
+    form {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+    }
+    fieldset {
+      border: none;
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      margin-top: 0.25rem;
+    }
+    .radio-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    .radio-group label {
+      font-weight: normal;
+    }
+    button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
     }
   </style>
 </head>
 <body>
-  <header class="hero">
-    <h1>INTERFACE UTILISATEUR</h1>
-  </header>
+  <div class="wrapper">
 
-  <main class="container">
-    <h2>Bienvenue</h2>
-    <p>Bienvenue sur l'interface Utilisateur de la Pharmacie du Centre de secours de MONTMIRAIL.</p>
-    <p>Merci de prendre le temps de remplir ce formulaire. Veuillez répondre à toutes les questions avec précision. Vos réponses nous aideront à organiser le stock de la pharmacie.</p>
-    <p>Cela ne prendra que quelques minutes. Si vous avez des questions, n'hésitez pas à nous contacter.</p>
-  </main>
+    <!-- Cadre Titre -->
+    <div class="card">
+      <div class="card-header">INTERFACE UTILISATEUR</div>
+    </div>
 
-  <footer>
-    &copy; 2025 Pharmacie du Centre • Tous droits réservés
-  </footer>
+    <!-- Cadre d'introduction -->
+    <div class="card">
+      <div class="card-body">
+        <p><strong>Interface Utilisateur</strong></p>
+        <p>Bienvenue sur l'interface Utilisateur de la Pharmacie du Centre de secours de MONTMIRAIL,</p>
+        <p>Merci de prendre le temps de remplir ce formulaire.</p>
+        <p>Veuillez répondre à toutes les questions avec précision.</p>
+        <p>Vos réponses nous aideront à organiser le stock de la pharmacie.</p>
+        <p>Cela ne prendra que quelques minutes. Si vous avez des questions, n’hésitez pas à nous contacter.</p>
+        <p class="required-note">* Indique une question obligatoire</p>
+      </div>
+    </div>
+
+    <!-- Formulaire -->
+    <form action="#" method="POST">
+      <!-- Exemple question 1 -->
+      <fieldset>
+        <label for="nomPrenom">Nom et prénom * </label>
+        <select id="nomPrenom" name="nomPrenom" required>
+          <option value="">— Choisissez —</option>
+          <option>LEFEVRE Nicolas</option>
+          <option>HYONNE Nicolas</option>
+          <option>JAMBE Christophe</option>
+          <!-- etc. -->
+        </select>
+      </fieldset>
+
+      <!-- Exemple question 2 -->
+      <fieldset>
+        <label>Quel Étage ? *</label>
+        <div class="radio-group">
+          <label><input type="radio" name="etage" value="Etage 1" required> Etage 1</label>
+          <label><input type="radio" name="etage" value="Etage 2"> Etage 2</label>
+          <label><input type="radio" name="etage" value="Etage 3"> Etage 3</label>
+          <label><input type="radio" name="etage" value="Etage 4"> Etage 4</label>
+        </div>
+      </fieldset>
+
+      <button type="submit">Envoyer</button>
+    </form>
+
+  </div>
 </body>
 </html>
