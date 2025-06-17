@@ -302,7 +302,7 @@
         await updateDoc(doc(db, "produits", id), { stock: v });
         // Write a log entry
         await addDoc(logsCol, {
-          message: `Stock mis à jour pour "${activeRow.querySelector('.cell-name').textContent}" : ${v} unités.`,
+          message: `Stock mis à jour pour "${activeRow.querySelector('.cell-name').textContent}" : ${v} unités.`, user:role,
           timestamp: serverTimestamp()
         });
         activeRow.querySelector("td.stock").textContent = v;
