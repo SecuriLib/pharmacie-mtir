@@ -9,14 +9,36 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; background: #f0f4f8; }
 
+    /* En-tête avec image */
+    .hero {
+      width: 100%;
+      height: 180px;
+      background: url('https://lh7-rt.googleusercontent.com/formsz/AN7BsVBFbuGH9RmLMfZp0EEwGm9aIV5h_spBID1Zkq_gu8-his0SxYXbUsYd1mGXiQUM4EckhDnPVspmLXBLLpN_4lpEzSJQ5WMVdzTk2WQNg5-7kytluYv2S2FAPR0Asi0p87koZXXj0fYwCdwMslCnHtWv=w1600?key=yS58wdHiyb4u0Bd1ALb-nQ') center/cover no-repeat;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .hero::after {
+      content: 'INTERFACE UTILISATEUR';
+      position: absolute;
+      color: #fff;
+      font-size: 1.75rem;
+      letter-spacing: 2px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    }
+
     /* Container global */
     .wrapper {
       max-width: 800px;
-      margin: 2rem auto;
-      padding: 1rem;
+      margin: 0 auto;
+      padding: 0 1rem;
     }
 
-    /* Cadre général */
+    /* Cadre d'introduction */
     .card {
       background: #fff;
       border-radius: 8px;
@@ -24,15 +46,8 @@
       margin-bottom: 1.5rem;
       overflow: hidden;
     }
-    .card-header {
-      background: #007bff;
-      color: #fff;
-      padding: 1rem;
-      font-size: 1.25rem;
-      letter-spacing: 1px;
-    }
     .card-body {
-      padding: 1rem 1.5rem;
+      padding: 1.5rem;
       color: #444;
       line-height: 1.6;
     }
@@ -42,7 +57,7 @@
     .required-note {
       margin-top: 0.5rem;
       font-size: 0.85rem;
-      color: #555;
+      color: #d9534f;
     }
 
     /* Formulaire */
@@ -51,6 +66,7 @@
       border-radius: 8px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.1);
       padding: 1.5rem;
+      margin-bottom: 2rem;
     }
     fieldset {
       border: none;
@@ -60,6 +76,7 @@
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 600;
+      color: #333;
     }
     input[type="text"], select {
       width: 100%;
@@ -86,6 +103,7 @@
       border-radius: 4px;
       cursor: pointer;
       transition: background 0.3s;
+      margin-top: 1rem;
     }
     button:hover {
       background: #0056b3;
@@ -95,10 +113,8 @@
 <body>
   <div class="wrapper">
 
-    <!-- Cadre Titre -->
-    <div class="card">
-      <div class="card-header">INTERFACE UTILISATEUR</div>
-    </div>
+    <!-- En-tête image -->
+    <div class="hero"></div>
 
     <!-- Cadre d'introduction -->
     <div class="card">
