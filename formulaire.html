@@ -8,122 +8,49 @@
     /* Reset et typographie de base */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; background: #f0f4f8; }
+    .wrapper { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
 
-    /* En-tête avec image */
+    /* En-tête */
     .hero {
-      width: 100%;
-      height: 180px;
+      width: 100%; height: 180px;
       background: url('https://lh7-rt.googleusercontent.com/formsz/AN7BsVBFbuGH9RmLMfZp0EEwGm9aIV5h_spBID1Zkq_gu8-his0SxYXbUsYd1mGXiQUM4EckhDnPVspmLXBLLpN_4lpEzSJQ5WMVdzTk2WQNg5-7kytluYv2S2FAPR0Asi0p87koZXXj0fYwCdwMslCnHtWv=w1600?key=yS58wdHiyb4u0Bd1ALb-nQ') center/cover no-repeat;
-      border-radius: 8px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-      position: relative;
+      border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 1.5rem;
     }
     .hero::after {
-      position: absolute;
-      color: #fff;
-      font-size: 1.75rem;
-      letter-spacing: 2px;
+      content: 'INTERFACE UTILISATEUR'; position: absolute;
+      color: #fff; font-size: 1.75rem; letter-spacing: 2px;
       text-shadow: 0 1px 3px rgba(0,0,0,0.6);
     }
 
-    /* Container global */
-    .wrapper {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
+    /* Card Intro */
+    .card { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+    .card-body { padding: 1.5rem; color: #444; line-height: 1.6; }
+    .card-body p { margin-bottom: 0.75rem; }
+    .required-note { margin-top: 0.5rem; font-size: 0.85rem; color: #d9534f; }
 
-    /* Cadre d'introduction */
-    .card {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-      margin-bottom: 1.5rem;
-      overflow: hidden;
-    }
-    .card-body {
-      padding: 1.5rem;
-      color: #444;
-      line-height: 1.6;
-    }
-    .card-body p {
-      margin-bottom: 0.75rem;
-    }
-    .required-note {
-      margin-top: 0.5rem;
-      font-size: 0.85rem;
-      color: #d9534f;
-    }
+    /* Form multi-step */
+    form { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); padding: 1.5rem; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .form-image { display: block; max-width: 100%; height: auto; border-radius: 4px; margin: 1rem 0; box-shadow: 0 1px 6px rgba(0,0,0,0.1); }
+    fieldset { border: none; margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333; }
+    select { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; margin-top: 0.25rem; }
+    .radio-group { display: flex; gap: 1rem; margin-top: 0.5rem; }
+    .radio-group label { font-weight: normal; }
 
-    /* Formulaire */
-    form {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    .form-image {
-      display: block;
-      max-width: 100%;
-      height: auto;
-      border-radius: 4px;
-      margin-bottom: 1rem;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.1);
-    }
-    fieldset {
-      border: none;
-      margin-bottom: 1rem;
-    }
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      color: #333;
-    }
-    select {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 1rem;
-      margin-top: 0.25rem;
-    }
-    .radio-group {
-      display: flex;
-      gap: 1rem;
-      margin-top: 0.5rem;
-    }
-    .radio-group label {
-      font-weight: normal;
-    }
-    button {
-      background: #007bff;
-      color: #fff;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.3s;
-      margin-top: 1rem;
-    }
-    button:hover {
-      background: #0056b3;
-    }
+    /* Navigation buttons */
+    .actions { display: flex; justify-content: space-between; margin-top: 1rem; }
+    .actions button { background: #007bff; color: #fff; border: none; padding: 0.75rem 1.5rem; font-size: 1rem; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
+    .actions button:disabled { background: #aaa; cursor: default; }
+    .actions button:hover:not(:disabled) { background: #0056b3; }
   </style>
 </head>
 <body>
   <div class="wrapper">
 
-    <!-- En-tête image -->
     <div class="hero"></div>
-
-    <!-- Cadre d'introduction -->
     <div class="card">
       <div class="card-body">
         <p><strong>Interface Utilisateur</strong></p>
@@ -136,67 +63,121 @@
       </div>
     </div>
 
-    <!-- Formulaire -->
-    <form action="#" method="POST">
-      <!-- Question : Nom et prénom -->
-      <fieldset>
-        <label for="nomPrenom">Nom et prénom *</label>
-        <select id="nomPrenom" name="nomPrenom" required>
-          <option value="">— Sélectionnez —</option>
-          <option>LEFEVRE Nicolas</option>
-          <option>HYONNE Nicolas</option>
-          <option>JAMBE Christophe</option>
-          <option>BEAUJEU Guillaume</option>
-          <option>HIMMESOETE Olivier</option>
-          <option>SEMANN Pierre</option>
-          <option>BOUCHE Claudette</option>
-          <option>GERARD Stéphane</option>
-          <option>THOMAS Quentin</option>
-          <option>PERCHAT Michael</option>
-          <option>COANUS Yvann</option>
-          <option>COUILLIET Thomas</option>
-          <option>BELORGEY Cyril</option>
-          <option>CHAMPAGNE Frédéric</option>
-          <option>GORNET Didier</option>
-          <option>MERCIER Jean Michel</option>
-          <option>VELY Guy</option>
-          <option>LAMBOURDIERE Isabelle</option>
-          <option>BRESCHBUHL Geoffrey</option>
-          <option>VAUCHER Alexandre</option>
-          <option>SAINT Djack</option>
-          <option>GILLE David</option>
-          <option>VERDRU Kevin</option>
-          <option>HYONNE Léa</option>
-          <option>GERARD Emilie</option>
-          <option>MARIE Angélique</option>
-          <option>THIMOND Julie</option>
-          <option>PORTAS Manuel</option>
-          <option>CHASLIN Quentin</option>
-          <option>RABOT Louison</option>
-          <option>RICHEZ Rodolphe</option>
-          <option>VERDU Killian</option>
-          <option>LEFEVRE Lucas</option>
-          <option>GALAAD Paul</option>
-        </select>
-      </fieldset>
+    <form id="multiStepForm" action="#" method="POST">
+      <!-- Page 1 -->
+      <div class="page active" data-page="1">
+        <fieldset>
+          <label for="nomPrenom">Nom et prénom *</label>
+          <select id="nomPrenom" name="nomPrenom" required>
+            <option value="">— Sélectionnez —</option>
+            <option>LEFEVRE Nicolas</option>
+            <option>HYONNE Nicolas</option>
+            <option>JAMBE Christophe</option>
+            <option>BEAUJEU Guillaume</option>
+            <option>HIMMESOETE Olivier</option>
+            <option>SEMANN Pierre</option>
+            <option>BOUCHE Claudette</option>
+            <option>GERARD Stéphane</option>
+            <option>THOMAS Quentin</option>
+            <option>PERCHAT Michael</option>
+            <option>COANUS Yvann</option>
+            <option>COUILLIET Thomas</option>
+            <option>BELORGEY Cyril</option>
+            <option>CHAMPAGNE Frédéric</option>
+            <option>GORNET Didier</option>
+            <option>MERCIER Jean Michel</option>
+            <option>VELY Guy</option>
+            <option>LAMBOURDIERE Isabelle</option>
+            <option>BRESCHBUHL Geoffrey</option>
+            <option>VAUCHER Alexandre</option>
+            <option>SAINT Djack</option>
+            <option>GILLE David</option>
+            <option>VERDRU Kevin</option>
+            <option>HYONNE Léa</option>
+            <option>GERARD Emilie</option>
+            <option>MARIE Angélique</option>
+            <option>THIMOND Julie</option>
+            <option>PORTAS Manuel</option>
+            <option>CHASLIN Quentin</option>
+            <option>RABOT Louison</option>
+            <option>RICHEZ Rodolphe</option>
+            <option>VERDU Killian</option>
+            <option>LEFEVRE Lucas</option>
+            <option>GALAAD Paul</option>
+          </select>
+        </fieldset>
+        <img src="https://lh7-rt.googleusercontent.com/formsz/AN7BsVDH9VeKfEVWwRjbXSC6R8jOR4_HvHFakMDsm5Wh4Wf1LpkWCnfdPcPiRSHIlWSo-Mpwjeh40Je5ZG-SdUpI2zPdbMkKfsqpJTeusWpLgoVdIcC3Ny__uGCZdGQKjUJwTcER6KJjpQQTFqNSrK58UEfJ=w4000?key=yS58wdHiyb4u0Bd1ALb-nQ" alt="Armoires numérotées" class="form-image">
+        <fieldset>
+          <label>Quel Étage ? *</label>
+          <div class="radio-group">
+            <label><input type="radio" name="etage" value="Etage 1" required> Etage 1</label>
+            <label><input type="radio" name="etage" value="Etage 2"> Etage 2</label>
+            <label><input type="radio" name="etage" value="Etage 3"> Etage 3</label>
+            <label><input type="radio" name="etage" value="Etage 4"> Etage 4</label>
+          </div>
+        </fieldset>
+      </div>
 
-      <!-- Image de l'armoire -->
-      <img src="https://lh7-rt.googleusercontent.com/formsz/AN7BsVDH9VeKfEVWwRjbXSC6R8jOR4_HvHFakMDsm5Wh4Wf1LpkWCnfdPcPiRSHIlWSo-Mpwjeh40Je5ZG-SdUpI2zPdbMkKfsqpJTeusWpLgoVdIcC3Ny__uGCZdGQKjUJwTcER6KJjpQQTFqNSrK58UEfJ=w4000?key=yS58wdHiyb4u0Bd1ALb-nQ" alt="Armoires numérotées" class="form-image">
+      <!-- Page 2 -->
+      <div class="page" data-page="2">
+        <!-- Ici, ajoutez les questions de la 2ème page -->
+        <!-- Exemple : -->
+        <fieldset>
+          <label for="role">Votre rôle *</label>
+          <select id="role" name="role" required>
+            <option value="">— Sélectionnez —</option>
+            <option>Équipe médicale</option>
+            <option>Logistique</option>
+            <option>Sécurité</option>
+          </select>
+        </fieldset>
+      </div>
 
-      <!-- Question : Quel Étage ? -->
-      <fieldset>
-        <label>Quel Étage ? *</label>
-        <div class="radio-group">
-          <label><input type="radio" name="etage" value="Etage 1" required> Etage 1</label>
-          <label><input type="radio" name="etage" value="Etage 2"> Etage 2</label>
-          <label><input type="radio" name="etage" value="Etage 3"> Etage 3</label>
-          <label><input type="radio" name="etage" value="Etage 4"> Etage 4</label>
-        </div>
-      </fieldset>
-
-      <button type="submit">Suivant</button>
+      <!-- Actions navigation -->
+      <div class="actions">
+        <button type="button" id="prevBtn" disabled>Précédent</button>
+        <button type="button" id="nextBtn">Suivant</button>
+      </div>
     </form>
-
   </div>
+
+  <script>
+    (function(){
+      const pages = document.querySelectorAll('.page');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      let currentPage = 0;
+      function showPage(idx) {
+        pages.forEach((p,i) => p.classList.toggle('active', i === idx));
+        prevBtn.disabled = idx === 0;
+        nextBtn.textContent = (idx === pages.length - 1) ? 'Envoyer' : 'Suivant';
+      }
+      nextBtn.addEventListener('click', () => {
+        const form = document.getElementById('multiStepForm');
+        if (currentPage < pages.length - 1) {
+          // validation de la page
+          const inputs = pages[currentPage].querySelectorAll('select, input[type="radio"]');
+          for (let el of inputs) {
+            if (!el.checkValidity()) {
+              el.reportValidity();
+              return;
+            }
+          }
+          currentPage++;
+          showPage(currentPage);
+        } else {
+          form.submit();
+        }
+      });
+      prevBtn.addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          showPage(currentPage);
+        }
+      });
+      // Initial
+      showPage(currentPage);
+    })();
+  </script>
 </body>
 </html>
