@@ -120,16 +120,49 @@
 
       <!-- Page 2 -->
       <div class="page" data-page="2">
-        <!-- Ici, ajoutez les questions de la 2ème page -->
-        <!-- Exemple : -->
+        <!-- Page Etage 1 -->
+        <div class="card">
+          <div class="card-header" style="background:#6c7b95;color:#fff;padding:0.75rem 1rem;font-size:1rem;">Étage numéro 1</div>
+          <div class="card-body" style="padding:1rem;text-align:left;">
+            <p>Veuillez vous assurer de renseigner systématiquement les quantités des produits que vous réapprovisionnez dans le VSAV, afin de garantir une gestion rigoureuse des stocks et une disponibilité optimale du matériel.</p>
+          </div>
+        </div>
+        <!-- Questions Etage 1 -->
+        <!-- Gants Taille 6 / S -->
         <fieldset>
-          <label for="role">Votre rôle *</label>
-          <select id="role" name="role" required>
-            <option value="">— Sélectionnez —</option>
-            <option>Équipe médicale</option>
-            <option>Logistique</option>
-            <option>Sécurité</option>
-          </select>
+          <label>Gants Taille 6 / S</label>
+          <img src="[URL_S_IMAGE]" alt="Gants Taille S" class="form-image">
+          <input type="number" name="q_s" min="0" placeholder="Quantité gants taille S" required style="width:100%;padding:0.5rem;border:1px solid #ccc;border-radius:4px;">
+        </fieldset>
+        <!-- Gants Taille 7 / M -->
+        <fieldset>
+          <label>Gants Taille 7 / M</label>
+          <img src="[URL_M_IMAGE]" alt="Gants Taille M" class="form-image">
+          <input type="number" name="q_m" min="0" placeholder="Quantité gants taille M" required style="width:100%;padding:0.5rem;border:1px solid #ccc;border-radius:4px;">
+        </fieldset>
+        <!-- Gants Taille 8 / L -->
+        <fieldset>
+          <label>Gants Taille 8 / L</label>
+          <img src="[URL_L_IMAGE]" alt="Gants Taille L" class="form-image">
+          <input type="number" name="q_l" min="0" placeholder="Quantité gants taille L" required style="width:100%;padding:0.5rem;border:1px solid #ccc;border-radius:4px;">
+        </fieldset>
+        <!-- Gants Taille 9 / XL -->
+        <fieldset>
+          <label>Gants Taille 9 / XL</label>
+          <img src="[URL_XL_IMAGE]" alt="Gants Taille XL" class="form-image">
+          <input type="number" name="q_xl" min="0" placeholder="Quantité gants taille XL" required style="width:100%;padding:0.5rem;border:1px solid #ccc;border-radius:4px;">
+        </fieldset>
+        <!-- Essuie-mains -->
+        <fieldset>
+          <label>Essuie-mains</label>
+          <img src="[URL_ESSUIE_IMAGE]" alt="Essuie-mains" class="form-image">
+          <input type="number" name="q_essuie" min="0" placeholder="Quantité Essuie-mains" required style="width:100%;padding:0.5rem;border:1px solid #ccc;border-radius:4px;">
+        </fieldset>
+        <!-- Surfa'Safe Anios -->
+        <fieldset>
+          <label>Surfa'Safe Anios</label>
+          <img src="[URL_SURFA_IMAGE]" alt="Surfa'Safe Anios" class="form-image">
+          <input type="number" name="q_surfa" min="0" placeholder="Quantité Surfa'Safe Anios" required style="width:100%;padding:0.5rem;border:1px solid #ccc;border-radius:4px;">
         </fieldset>
       </div>
 
